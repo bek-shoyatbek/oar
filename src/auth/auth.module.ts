@@ -4,9 +4,18 @@ import { AuthController } from './auth.controller';
 import { MailService } from '../mail/mail.service';
 import { GeneratorService } from '../utils/generator/generator.service';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { UsersService } from 'src/users/users.service';
+import { PrismaService } from 'src/prisma.service';
+import { HashingService } from 'src/utils/hashing/hashing.service';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
+    MulterModule.register({ dest: './uploads' }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
@@ -14,7 +23,13 @@ import { JwtModule } from '@nestjs/jwt';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, MailService, GeneratorService],
+  providers: [
+    AuthService,
+    MailService,
+    GeneratorService,
+    UsersService,
+    PrismaService,
+    HashingService,
+  ],
 })
-export class AuthModule {
-}
+export class AuthModule {}

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { CONFIRMATION_MESSAGE } from '../../constants/confirmation-message.mail';
+import {
+  CONFIRMATION_MESSAGE_EMAIL,
+  CONFIRMATION_MESSAGE_PHONE,
+} from '../../constants/confirmation-message.mail';
 import { v4 as uuidv4 } from 'uuid';
-
 
 @Injectable()
 export class GeneratorService {
@@ -10,10 +12,15 @@ export class GeneratorService {
   }
 
   generateConfirmationCode(): number {
-    return Math.floor(100000 + Math.random() * 900000); // 5 numbers
+    return Math.floor(10000 + Math.random() * 90000); // 5 numbers
   }
 
-  generateConfirmationMessage(code: number): string {
-    return CONFIRMATION_MESSAGE(code);
+  generateConfirmationMessage(
+    code: number,
+    service: 'email' | 'phone',
+  ): string {
+    return service === 'phone'
+      ? CONFIRMATION_MESSAGE_PHONE(code)
+      : CONFIRMATION_MESSAGE_EMAIL(code);
   }
 }

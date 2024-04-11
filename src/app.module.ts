@@ -10,13 +10,16 @@ import { CoursesModule } from './courses/courses.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { GeneratorService } from './utils/generator/generator.service';
 import { PassportModule } from '@nestjs/passport';
-
+import { HashingService } from './utils/hashing/hashing.service';
 
 @Module({
-  imports: [UsersModule,
+  imports: [
+    UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
-    }), AuthModule, MailModule,
+    }),
+    AuthModule,
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MailerModule.forRoot({
       transport: {
@@ -30,14 +33,13 @@ import { PassportModule } from '@nestjs/passport';
       defaults: {
         from: process.env.MAILER_FROM,
       },
-
     }),
     CoursesModule,
     CacheModule.register({
       isGlobal: true,
-    })],
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService, GeneratorService],
+  providers: [AppService, GeneratorService, HashingService],
 })
-export class AppModule {
-}
+export class AppModule {}
