@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  email        String?   @unique
+  phone        String?   @unique
+  password     String
+  fullname     String?
+  avatar       String?
+  refreshToken String?
+  Course       Course[]
+  Payment      Payment[]
+}
+
+model Course {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  titleUz       String?
+  titleRu       String?
+  avatar        String?
+  descriptionUz String?
+  descriptionRu String?
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String    @db.ObjectId
+  Module        Module[]
+  Payment       Payment[]
+}
+
+model Module {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  titleUz       String?
+  titleRu       String?
+  avatar        String?
+  descriptionUz String?
+  descriptionRu String?
+  course        Course   @relation(fields: [courseId], references: [id])
+  courseId      String   @db.ObjectId
+  Lesson        Lesson[]
+}
+
+model Lesson {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  titleUz       String?
+  titleRu       String?
+  video         String
+  descriptionUz String?
+  descriptionRu String?
+  attachedFile  String?
+  module        Module   @relation(fields: [moduleId], references: [id])
+  moduleId      String   @db.ObjectId
+}
+
+model Payment {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  provider  Payment_providers
+  amount    Int
+  user      User              @relation(fields: [userId], references: [id])
+  userId    String            @db.ObjectId
+  course    Course            @relation(fields: [courseId], references: [id])
+  courseId  String            @db.ObjectId
+}
+
+enum Payment_providers {
+  payme
+  uzum
+  click
+}
