@@ -10,6 +10,7 @@ async function bootstrap() {
 
   app.use(morgan('dev'));
   await app.listen(port);
+
 }
 
 bootstrap().then(r => console.log('Server started on port ' + port));
