@@ -1,34 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { RegisterWithEmailDto } from './dto/register-with-email.dto';
+import { RegisterWithPhoneDto } from './dto/register-with-phone.dto';
+import { ConfirmCodeDto } from './dto/confirm-code.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Post()
-  create(@Body() createAuthDto: CreateAuthDto) {
-    return this.authService.create(createAuthDto);
+  constructor(private readonly authService: AuthService) {
   }
 
-  @Get()
-  findAll() {
-    return this.authService.findAll();
+  @Post('email/register')
+  async registerWithEmail(@Body() registerWithEmailDto: RegisterWithEmailDto) {
+    return await this.authService.registerWithEmail(registerWithEmailDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authService.findOne(+id);
+  @Post('email/login')
+  async loginWithEmail(@Body() registerWithEmailDto: RegisterWithEmailDto) {
+    return await this.authService.loginWithEmail(registerWithEmailDto);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAuthDto: UpdateAuthDto) {
-    return this.authService.update(+id, updateAuthDto);
+  @Post('phone/register')
+  async registerWithPhone(@Body() registerWithPhoneDto: RegisterWithPhoneDto) {
+    return await this.authService.registerWIthPhone(registerWithPhoneDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authService.remove(+id);
+  @Post('phone/login')
+  async loginWithPhone(@Body() registerWithPhoneDto: RegisterWithPhoneDto) {
+    return await this.authService.loginWithPhone(registerWithPhoneDto);
   }
+
+  @Post('confirm-code')
+  async confirmCode(@Body() confirmCodeDto: ConfirmCodeDto) {
+    return await this.authService.confirmCode(confirmCodeDto);
+  }
+
 }

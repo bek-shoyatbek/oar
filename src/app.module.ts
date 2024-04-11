@@ -5,13 +5,39 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { CoursesModule } from './courses/courses.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { GeneratorService } from './utils/generator/generator.service';
+import { PassportModule } from '@nestjs/passport';
+
 
 @Module({
-  imports: [UsersModule, ConfigModule.forRoot({
-    isGlobal: true,
-  }), AuthModule, MailModule],
+  imports: [UsersModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }), AuthModule, MailModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    MailerModule.forRoot({
+      transport: {
+        service: 'gmail',
+        secure: false,
+        auth: {
+          user: process.env.MAILER_USER,
+          pass: process.env.MAILER_PASSWORD,
+        },
+      },
+      defaults: {
+        from: process.env.MAILER_FROM,
+      },
+
+    }),
+    CoursesModule,
+    CacheModule.register({
+      isGlobal: true,
+    })],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, GeneratorService],
 })
 export class AppModule {
 }
