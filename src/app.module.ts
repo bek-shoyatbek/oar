@@ -11,6 +11,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { GeneratorService } from './utils/generator/generator.service';
 import { PassportModule } from '@nestjs/passport';
 import { HashingService } from './utils/hashing/hashing.service';
+import { SmsModule } from './sms/sms.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { HashingService } from './utils/hashing/hashing.service';
     CacheModule.register({
       isGlobal: true,
     }),
+    SmsModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

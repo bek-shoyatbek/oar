@@ -9,9 +9,11 @@ import { UsersService } from 'src/users/users.service';
 import { PrismaService } from 'src/prisma.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { MulterModule } from '@nestjs/platform-express';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
+    CloudinaryModule,
     MulterModule.register({ dest: './uploads' }),
     ConfigModule.forRoot({
       isGlobal: true,

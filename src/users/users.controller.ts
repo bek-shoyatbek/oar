@@ -16,10 +16,14 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from './constants/storage';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private cloudinary: CloudinaryService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get('profile')
@@ -43,7 +47,12 @@ export class UsersController {
   ) {
     const userId = req?.user?.userId;
 
-    updateUserDto.avatar = avatar?.filename;
+    const uploadToCDNResult = await this.cloudinary.uploadImage(avatar);
+    if (uploadToCDNResult?.error) {
+      throw new BadRequestException(uploadToCDNResult.error);
+    }
+
+    updateUserDto.avatar = uploadToCDNResult.url;
 
     return await this.usersService.update(userId, updateUserDto);
   }
