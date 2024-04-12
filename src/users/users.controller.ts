@@ -17,6 +17,7 @@ import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from './constants/storage';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { getAvatarValidator } from 'src/utils/custom-validators/avatar-validator/avatar-validator';
 
 @Controller('users')
 export class UsersController {
@@ -43,12 +44,12 @@ export class UsersController {
   async update(
     @Request() req,
     @Body() updateUserDto: Prisma.UserUpdateInput,
-    @UploadedFile() avatar: Express.Multer.File,
+    @UploadedFile(getAvatarValidator()) avatar: Express.Multer.File,
   ) {
     const userId = req?.user?.userId;
 
     if (avatar) {
-      const uploadToCDNResult = await this.cloudinary.uploadImage(avatar);
+      const uploadToCDNResult = await this.cloudinary.upload(avatar);
       if (uploadToCDNResult?.error) {
         throw new BadRequestException(uploadToCDNResult.error);
       }
