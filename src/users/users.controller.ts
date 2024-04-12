@@ -47,12 +47,14 @@ export class UsersController {
   ) {
     const userId = req?.user?.userId;
 
-    const uploadToCDNResult = await this.cloudinary.uploadImage(avatar);
-    if (uploadToCDNResult?.error) {
-      throw new BadRequestException(uploadToCDNResult.error);
-    }
+    if (avatar) {
+      const uploadToCDNResult = await this.cloudinary.uploadImage(avatar);
+      if (uploadToCDNResult?.error) {
+        throw new BadRequestException(uploadToCDNResult.error);
+      }
 
-    updateUserDto.avatar = uploadToCDNResult.url;
+      updateUserDto.avatar = uploadToCDNResult.url;
+    }
 
     return await this.usersService.update(userId, updateUserDto);
   }
