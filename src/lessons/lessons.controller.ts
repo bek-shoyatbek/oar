@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   Patch,
   Post,
@@ -38,6 +39,11 @@ export class LessonsController {
 
     createLessonDto.video = uploadToCDNResult.url;
     return await this.lessonsService.create(moduleId, createLessonDto);
+  }
+
+  @Get('single/:id')
+  async findOne(@Param('id') id: string) {
+    return await this.lessonsService.findOne(id);
   }
 
   @Patch('update/:id')

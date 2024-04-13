@@ -49,7 +49,7 @@ export class UsersController {
     const userId = req?.user?.userId;
 
     if (avatar) {
-      const uploadToCDNResult = await this.cloudinary.upload(avatar);
+      const uploadToCDNResult = await this.cloudinary.upload(avatar, 'image');
       if (uploadToCDNResult?.error) {
         throw new BadRequestException(uploadToCDNResult.error);
       }

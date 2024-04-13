@@ -14,6 +14,7 @@ import { HashingService } from './utils/hashing/hashing.service';
 import { SmsModule } from './sms/sms.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ModulesModule } from './modules/modules.module';
+import { LessonsModule } from './lessons/lessons.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ModulesModule } from './modules/modules.module';
     SmsModule,
     CloudinaryModule,
     ModulesModule,
+    LessonsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],
