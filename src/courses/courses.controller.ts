@@ -40,7 +40,7 @@ export class CoursesController {
     if (!image) {
       throw new BadRequestException('image is required');
     }
-    const uploadToCDNResult = await this.cloudinary.upload(image);
+    const uploadToCDNResult = await this.cloudinary.upload(image, 'image');
     if (uploadToCDNResult?.error) {
       throw new BadRequestException(uploadToCDNResult.error);
     }
@@ -58,7 +58,7 @@ export class CoursesController {
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
     if (image) {
-      const uploadToCDNResult = await this.cloudinary.upload(image);
+      const uploadToCDNResult = await this.cloudinary.upload(image, 'image');
       if (uploadToCDNResult?.error) {
         throw new BadRequestException(uploadToCDNResult.error);
       }

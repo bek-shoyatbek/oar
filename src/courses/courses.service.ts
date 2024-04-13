@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
@@ -22,6 +22,14 @@ export class CoursesService {
   }
 
   async update(id: string, updateCourseDto: Prisma.CourseUpdateInput) {
+    const course = await this.prismaService.course.findUnique({
+      where: { id },
+    });
+
+    if (!course) {
+      throw new BadRequestException('Course not found');
+    }
+
     return await this.prismaService.course.update({
       where: { id },
       data: updateCourseDto,
@@ -29,6 +37,13 @@ export class CoursesService {
   }
 
   async remove(id: string) {
+    const course = await this.prismaService.course.findUnique({
+      where: { id },
+    });
+
+    if (!course) {
+      throw new BadRequestException('Course not found');
+    }
     return await this.prismaService.course.delete({ where: { id } });
   }
 }
