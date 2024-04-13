@@ -13,6 +13,7 @@ import { PassportModule } from '@nestjs/passport';
 import { HashingService } from './utils/hashing/hashing.service';
 import { SmsModule } from './sms/sms.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ModulesModule } from './modules/modules.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     }),
     SmsModule,
     CloudinaryModule,
+    ModulesModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

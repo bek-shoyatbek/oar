@@ -17,7 +17,7 @@ import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from './constants/storage';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { getAvatarValidator } from 'src/utils/custom-validators/avatar-validator/avatar-validator';
+import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 
 @Controller('users')
 export class UsersController {
@@ -44,7 +44,7 @@ export class UsersController {
   async update(
     @Request() req,
     @Body() updateUserDto: Prisma.UserUpdateInput,
-    @UploadedFile(getAvatarValidator()) avatar: Express.Multer.File,
+    @UploadedFile(getImageValidator()) avatar: Express.Multer.File,
   ) {
     const userId = req?.user?.userId;
 

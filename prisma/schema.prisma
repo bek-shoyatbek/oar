@@ -33,7 +33,7 @@ model Course {
   updatedAt     DateTime @updatedAt
   titleUz       String?
   titleRu       String?
-  avatar        String?
+  image         String?
   descriptionUz String?
   descriptionRu String?
   Module        Module[]
@@ -46,7 +46,7 @@ model Module {
   updatedAt     DateTime @updatedAt
   titleUz       String?
   titleRu       String?
-  avatar        String?
+  image        String?
   descriptionUz String?
   descriptionRu String?
   course        Course   @relation(fields: [courseId], references: [id])
