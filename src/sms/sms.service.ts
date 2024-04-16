@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Sms } from './interfaces/sms.interface';
-import { createHash } from 'node:crypto';
+// import { createHash } from 'node:crypto';
 import {
   SendSmsErrorResponse,
   SendSmsParams,
@@ -41,9 +41,11 @@ export class SmsService implements Sms {
 
       uTime = +uTime.toString().split('.')[0];
 
-      const accessToken = this.md5(
-        `TransmitSMS ${this.username} ${this.smsSecret} ${uTime}`,
-      );
+      // const accessToken = this.md5(
+      //   `TransmitSMS ${this.username} ${this.smsSecret} ${uTime}`,
+      // );
+
+      const accessToken = 'test '; // ! for test
       const headersRequest = {
         'Content-Type': 'application/json',
         'X-Access-Token': accessToken,
@@ -74,9 +76,9 @@ export class SmsService implements Sms {
     throw new Error('Method not implemented.');
   }
 
-  md5(content: string, algo = 'md5') {
-    const hashFunc = createHash(algo);
-    hashFunc.update(content);
-    return hashFunc.digest('hex');
-  }
+  // md5(content: string, algo = 'md5') {
+  //   const hashFunc = createHash(algo);
+  //   hashFunc.update(content);
+  //   return hashFunc.digest('hex');
+  // }
 }
