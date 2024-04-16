@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ObjectId } from 'mongodb';
-import { DriveService } from 'src/google/drive/drive.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
