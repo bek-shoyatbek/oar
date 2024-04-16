@@ -15,6 +15,7 @@ import { SmsModule } from './sms/sms.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ModulesModule } from './modules/modules.module';
 import { LessonsModule } from './lessons/lessons.module';
+import { GoogleDriveModule } from 'nestjs-google-drive';
 
 @Module({
   imports: [
@@ -46,6 +47,12 @@ import { LessonsModule } from './lessons/lessons.module';
     CloudinaryModule,
     ModulesModule,
     LessonsModule,
+    GoogleDriveModule.register({
+      clientId: process.env.GC_CLIENT_ID,
+      clientSecret: process.env.GC_CLIENT_SECRET,
+      redirectUrl: process.env.GC_REDIRECT_URI,
+      refreshToken: process.env.GC_REFRESH_TOKEN,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

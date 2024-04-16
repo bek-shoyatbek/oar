@@ -13,7 +13,10 @@ export class CloudinaryService {
       const upload = v2.uploader.upload_stream(
         { resource_type: fileType },
         (error, result) => {
-          if (error) return reject(error);
+          if (error) {
+            console.error('Cloudinary error', error);
+            return reject(error);
+          }
           resolve(result);
         },
       );

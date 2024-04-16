@@ -8,6 +8,10 @@ const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const curr = new Date();
+
+  console.log('iso date is', curr.toISOString());
+
   app.setGlobalPrefix('api/v1');
 
   app.use(morgan('dev'));

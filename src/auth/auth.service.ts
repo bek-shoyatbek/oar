@@ -10,6 +10,7 @@ import { GeneratorService } from '../utils/generator/generator.service';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
+import { SmsService } from 'src/sms/sms.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UsersService,
     private hashingService: HashingService,
+    private readonly smsService: SmsService,
   ) {}
 
   async registerWithEmail(registerWithEmailDto: RegisterWithEmailDto) {
@@ -115,12 +117,12 @@ export class AuthService {
       'phone',
     );
 
-    // TODO send sms
-    // await this.mailService.sendMail({
-    //   to: registerWithPhoneDto.phone,
-    //   subject: 'Confirmation code',
-    //   html: message,
-    // });
+    const res = await this.smsService.sendSms({
+      phone: registerWithPhoneDto.phone,
+      text: message,
+    });
+
+    console.log('res', res);
 
     registerWithPhoneDto.password = await this.hashingService.hashPassword(
       registerWithPhoneDto.password,

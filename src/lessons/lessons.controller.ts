@@ -15,13 +15,22 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from 'src/users/constants/storage';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { DriveService } from 'src/google/drive/drive.service';
 
 @Controller('lessons')
 export class LessonsController {
+  private readonly GOOGLE_DRIVE_FOLDER_ID: string;
+
   constructor(
     private readonly lessonsService: LessonsService,
     private cloudinary: CloudinaryService,
-  ) {}
+    private readonly googleDriveService: DriveService,
+    private readonly configService: ConfigService,
+  ) {
+    this.GOOGLE_DRIVE_FOLDER_ID =
+      this.configService.get<string>('GD_FOLDER_ID');
+  }
   @Post('create/:moduleId')
   @UseInterceptors(FileInterceptor('video', { storage: STORAGE }))
   async create(
@@ -32,13 +41,18 @@ export class LessonsController {
     if (!video) {
       throw new BadRequestException('video is required');
     }
-    const uploadToCDNResult = await this.cloudinary.upload(video, 'video');
-    if (uploadToCDNResult?.error) {
-      throw new BadRequestException(uploadToCDNResult.error);
-    }
+    console.log('video', video);
+    const avatarUrl = await this.googleDriveService.uploadFile(video);
+    console.log('avatarUrl', avatarUrl);
+    // createLessonDto.video = avatarUrl;
+    // const uploadToCDNResult = await this.cloudinary.upload(video, 'video');
+    // if (uploadToCDNResult?.error) {
+    //   throw new BadRequestException(uploadToCDNResult.error);
+    // }
 
-    createLessonDto.video = uploadToCDNResult.url;
-    return await this.lessonsService.create(moduleId, createLessonDto);
+    // createLessonDto.video = uploadToCDNResult.url;
+    return 'Done';
+    // return await this.lessonsService.create(moduleId, createLessonDto);
   }
 
   @Get('single/:id')
