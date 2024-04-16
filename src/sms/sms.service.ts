@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Sms } from './interfaces/sms.interface';
-// import { createHash } from 'node:crypto';
+import { createHash } from 'node:crypto';
 import {
   SendSmsErrorResponse,
   SendSmsParams,
@@ -19,8 +19,8 @@ export class SmsService implements Sms {
   private smsSecret: string;
 
   constructor(
-    private configService: ConfigService,
-    private generatorService: GeneratorService,
+    private readonly configService: ConfigService,
+    private readonly generatorService: GeneratorService,
     private readonly httpService: HttpService,
   ) {
     this.username = this.configService.get<string>('SMS_USERNAME');
@@ -39,13 +39,11 @@ export class SmsService implements Sms {
         smsid: smsId,
       };
 
-      uTime = +uTime.toString().split('.')[0];
+      const utime = +uTime.toString().split('.')[0];
 
-      // const accessToken = this.md5(
-      //   `TransmitSMS ${this.username} ${this.smsSecret} ${uTime}`,
-      // );
-
-      const accessToken = 'test '; // ! for test
+      const accessToken = this.md5(
+        `TransmitSMS ${this.username} ${this.smsSecret} ${utime}`,
+      );
       const headersRequest = {
         'Content-Type': 'application/json',
         'X-Access-Token': accessToken,
@@ -76,9 +74,9 @@ export class SmsService implements Sms {
     throw new Error('Method not implemented.');
   }
 
-  // md5(content: string, algo = 'md5') {
-  //   const hashFunc = createHash(algo);
-  //   hashFunc.update(content);
-  //   return hashFunc.digest('hex');
-  // }
+  md5(content: string, algo = 'md5') {
+    const hashFunc = createHash(algo);
+    hashFunc.update(content);
+    return hashFunc.digest('hex');
+  }
 }
