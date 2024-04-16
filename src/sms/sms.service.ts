@@ -18,7 +18,6 @@ export class SmsService implements Sms {
   private smsURL: string;
   private smsSecret: string;
 
-  private headersRequest: object;
   constructor(
     private configService: ConfigService,
     private generatorService: GeneratorService,
@@ -33,12 +32,14 @@ export class SmsService implements Sms {
     sendSmsParams: SendSmsParams,
   ): Promise<SendSmsResponse | SendSmsErrorResponse> {
     try {
-      const uTime = new Date().valueOf() / 1000;
-      const smsId = this.generatorService.generateUUID();
+      let uTime = new Date().valueOf() / 1000;
+      const smsId = this.generatorService.generateConfirmationCode();
       const message = {
         ...sendSmsParams,
         smsid: smsId,
       };
+
+      uTime = +uTime.toString().split('.')[0];
 
       const accessToken = this.md5(
         `TransmitSMS ${this.username} ${this.smsSecret} ${uTime}`,
@@ -63,11 +64,10 @@ export class SmsService implements Sms {
 
       const res = await firstValueFrom(request);
 
-      console.log('res in service', res);
-
       return res.data;
     } catch (err) {
       console.log('error while sending sms', err);
+      throw err;
     }
   }
   async statusSms(params: SmsStatusParams): Promise<any> {
