@@ -15,6 +15,7 @@ import { SmsModule } from './sms/sms.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ModulesModule } from './modules/modules.module';
 import { LessonsModule } from './lessons/lessons.module';
+import { S3Module } from './aws/s3/s3.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { LessonsModule } from './lessons/lessons.module';
     CloudinaryModule,
     ModulesModule,
     LessonsModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

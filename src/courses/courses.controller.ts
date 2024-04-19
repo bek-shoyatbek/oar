@@ -15,16 +15,18 @@ import {
 import { CoursesService } from './courses.service';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { STORAGE } from 'src/users/constants/storage';
+import { STORAGE } from 'src/constants/storage';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { ValidateObjectIdDto } from './dto/validate-objectId.dto';
+import { S3Service } from 'src/aws/s3/s3.service';
 
 @Controller('courses')
 export class CoursesController {
   constructor(
     private readonly coursesService: CoursesService,
     private cloudinary: CloudinaryService,
+    private readonly s3Service: S3Service,
   ) {}
   @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @Post('create')
@@ -40,12 +42,10 @@ export class CoursesController {
     if (!image) {
       throw new BadRequestException('image is required');
     }
-    const uploadToCDNResult = await this.cloudinary.upload(image, 'image');
-    if (uploadToCDNResult?.error) {
-      throw new BadRequestException(uploadToCDNResult.error);
-    }
 
-    createCourseDto.image = uploadToCDNResult.url;
+    const fileUrl = await this.s3Service.upload(image);
+
+    createCourseDto.image = fileUrl;
 
     return await this.coursesService.create(createCourseDto);
   }
@@ -58,12 +58,9 @@ export class CoursesController {
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
     if (image) {
-      const uploadToCDNResult = await this.cloudinary.upload(image, 'image');
-      if (uploadToCDNResult?.error) {
-        throw new BadRequestException(uploadToCDNResult.error);
-      }
+      const fileUrl = await this.s3Service.upload(image);
 
-      updateCourseDto.image = uploadToCDNResult.url;
+      updateCourseDto.image = fileUrl;
     }
 
     return await this.coursesService.update(id, updateCourseDto);

@@ -15,15 +15,17 @@ import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { STORAGE } from './constants/storage';
+import { STORAGE } from '../constants/storage';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
+import { S3Service } from 'src/aws/s3/s3.service';
 
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private cloudinary: CloudinaryService,
+    private readonly s3Service: S3Service,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -49,12 +51,9 @@ export class UsersController {
     const userId = req?.user?.userId;
 
     if (avatar) {
-      const uploadToCDNResult = await this.cloudinary.upload(avatar, 'image');
-      if (uploadToCDNResult?.error) {
-        throw new BadRequestException(uploadToCDNResult.error);
-      }
+      const fileUrl = await this.s3Service.upload(avatar);
 
-      updateUserDto.avatar = uploadToCDNResult.url;
+      updateUserDto.avatar = fileUrl;
     }
 
     return await this.usersService.update(userId, updateUserDto);
