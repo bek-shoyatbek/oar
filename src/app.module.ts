@@ -12,7 +12,6 @@ import { GeneratorService } from './utils/generator/generator.service';
 import { PassportModule } from '@nestjs/passport';
 import { HashingService } from './utils/hashing/hashing.service';
 import { SmsModule } from './sms/sms.module';
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ModulesModule } from './modules/modules.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { S3Module } from './aws/s3/s3.module';
@@ -44,7 +43,6 @@ import { S3Module } from './aws/s3/s3.module';
       isGlobal: true,
     }),
     SmsModule,
-    CloudinaryModule,
     ModulesModule,
     LessonsModule,
     S3Module,

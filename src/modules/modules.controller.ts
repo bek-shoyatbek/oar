@@ -15,7 +15,6 @@ import { Prisma } from '@prisma/client';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from 'src/constants/storage';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ValidateObjectIdDto } from 'src/courses/dto/validate-objectId.dto';
 import { S3Service } from 'src/aws/s3/s3.service';
 
@@ -23,7 +22,6 @@ import { S3Service } from 'src/aws/s3/s3.service';
 export class ModulesController {
   constructor(
     private readonly modulesService: ModulesService,
-    private cloudinary: CloudinaryService,
     private readonly s3Service: S3Service,
   ) {}
   @Post('create/:courseId')

@@ -16,7 +16,6 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from '../constants/storage';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { S3Service } from 'src/aws/s3/s3.service';
 
@@ -24,7 +23,6 @@ import { S3Service } from 'src/aws/s3/s3.service';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private cloudinary: CloudinaryService,
     private readonly s3Service: S3Service,
   ) {}
 

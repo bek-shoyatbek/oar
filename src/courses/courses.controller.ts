@@ -16,7 +16,6 @@ import { CoursesService } from './courses.service';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from 'src/constants/storage';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { ValidateObjectIdDto } from './dto/validate-objectId.dto';
 import { S3Service } from 'src/aws/s3/s3.service';
@@ -25,16 +24,11 @@ import { S3Service } from 'src/aws/s3/s3.service';
 export class CoursesController {
   constructor(
     private readonly coursesService: CoursesService,
-    private cloudinary: CloudinaryService,
     private readonly s3Service: S3Service,
   ) {}
   @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @Post('create')
-  @UsePipes(
-    new ValidationPipe({
-      transform: true,
-    }),
-  )
+  @UsePipes()
   async create(
     @Body() createCourseDto: Prisma.CourseCreateInput,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,

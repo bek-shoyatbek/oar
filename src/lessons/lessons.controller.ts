@@ -13,7 +13,6 @@ import {
 import { LessonsService } from './lessons.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from 'src/constants/storage';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
 
@@ -21,7 +20,6 @@ import { S3Service } from 'src/aws/s3/s3.service';
 export class LessonsController {
   constructor(
     private readonly lessonsService: LessonsService,
-    private cloudinary: CloudinaryService,
     private readonly s3Service: S3Service,
   ) {}
   @Post('create/:moduleId')
