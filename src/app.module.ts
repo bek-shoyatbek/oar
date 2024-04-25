@@ -15,6 +15,9 @@ import { SmsModule } from './sms/sms.module';
 import { ModulesModule } from './modules/modules.module';
 import { LessonsModule } from './lessons/lessons.module';
 import { S3Module } from './aws/s3/s3.module';
+import { PaymeModule } from './payments/payme/payme.module';
+import { ClickModule } from './payments/click/click.module';
+import { UzumModule } from './payments/uzum/uzum.module';
 
 @Module({
   imports: [
@@ -46,6 +49,9 @@ import { S3Module } from './aws/s3/s3.module';
     ModulesModule,
     LessonsModule,
     S3Module,
+    PaymeModule,
+    ClickModule,
+    UzumModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],
