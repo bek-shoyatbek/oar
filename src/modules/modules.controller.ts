@@ -28,7 +28,7 @@ export class ModulesController {
   @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   async create(
     @Param('courseId') courseId: string,
-    @Body() createModuleDto: Prisma.ModuleCreateInput,
+    @Body() createModuleDto: Prisma.ModulesCreateInput,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
     if (!image) {
@@ -47,7 +47,7 @@ export class ModulesController {
   @Patch('update/:id')
   @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   async update(
-    @Body() updateModuleDto: Prisma.ModuleUpdateInput,
+    @Body() updateModuleDto: Prisma.ModulesUpdateInput,
     @Param('id') id: string,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {

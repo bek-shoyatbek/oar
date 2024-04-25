@@ -7,12 +7,12 @@ import { PrismaService } from 'src/prisma.service';
 export class LessonsService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(moduleId: string, createLessonDto: Prisma.LessonCreateInput) {
+  async create(moduleId: string, createLessonDto: Prisma.LessonsCreateInput) {
     if (!ObjectId.isValid(moduleId)) {
       throw new BadRequestException('Invalid module id');
     }
 
-    const module = await this.prismaService.module.findUnique({
+    const module = await this.prismaService.modules.findUnique({
       where: { id: moduleId },
     });
 
@@ -20,7 +20,7 @@ export class LessonsService {
       throw new BadRequestException('Module not found');
     }
 
-    return await this.prismaService.lesson.create({
+    return await this.prismaService.lessons.create({
       data: {
         ...createLessonDto,
         module: {
@@ -36,14 +36,14 @@ export class LessonsService {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid module id');
     }
-    return await this.prismaService.lesson.findUnique({ where: { id } });
+    return await this.prismaService.lessons.findUnique({ where: { id } });
   }
-  async update(id: string, updateLessonDto: Prisma.LessonUpdateInput) {
+  async update(id: string, updateLessonDto: Prisma.LessonsUpdateInput) {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid lesson id');
     }
 
-    const lesson = await this.prismaService.lesson.findUnique({
+    const lesson = await this.prismaService.lessons.findUnique({
       where: { id },
     });
 
@@ -51,7 +51,7 @@ export class LessonsService {
       throw new BadRequestException('Lesson not found');
     }
 
-    return await this.prismaService.lesson.update({
+    return await this.prismaService.lessons.update({
       where: { id },
       data: updateLessonDto,
     });
@@ -61,7 +61,7 @@ export class LessonsService {
       throw new BadRequestException('Invalid lesson id');
     }
 
-    const lesson = await this.prismaService.lesson.findUnique({
+    const lesson = await this.prismaService.lessons.findUnique({
       where: { id },
     });
 
@@ -69,6 +69,6 @@ export class LessonsService {
       throw new BadRequestException('Lesson not found');
     }
 
-    return await this.prismaService.lesson.delete({ where: { id } });
+    return await this.prismaService.lessons.delete({ where: { id } });
   }
 }

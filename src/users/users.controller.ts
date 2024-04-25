@@ -43,7 +43,7 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('avatar', { storage: STORAGE }))
   async update(
     @Request() req,
-    @Body() updateUserDto: Prisma.UserUpdateInput,
+    @Body() updateUserDto: Prisma.UsersUpdateInput,
     @UploadedFile(getImageValidator()) avatar: Express.Multer.File,
   ) {
     const userId = req?.user?.userId;

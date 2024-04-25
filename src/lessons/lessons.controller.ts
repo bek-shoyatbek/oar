@@ -26,7 +26,7 @@ export class LessonsController {
   @UseInterceptors(FileInterceptor('video', { storage: STORAGE }))
   async create(
     @Param('moduleId') moduleId: string,
-    @Body() createLessonDto: Prisma.LessonCreateInput,
+    @Body() createLessonDto: Prisma.LessonsCreateInput,
     @UploadedFile() video: Express.Multer.File,
   ) {
     if (!video) {
@@ -47,7 +47,7 @@ export class LessonsController {
   @Patch('update/:id')
   @UseInterceptors(FileInterceptor('video', { storage: STORAGE }))
   async update(
-    @Body() updateLessonDto: Prisma.LessonUpdateInput,
+    @Body() updateLessonDto: Prisma.LessonsUpdateInput,
     @Param('id') id: string,
     @UploadedFile() video: Express.Multer.File,
   ) {

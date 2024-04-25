@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Users } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
-  async create(createUserDto: Prisma.UserCreateInput) {
-    const newUser = await this.prisma.user.create({
+  async create(createUserDto: Prisma.UsersCreateInput) {
+    const newUser = await this.prisma.users.create({
       data: createUserDto,
     });
 
@@ -15,7 +15,7 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    return await this.prisma.user.findFirst({
+    return await this.prisma.users.findFirst({
       where: {
         email,
       },
@@ -23,7 +23,7 @@ export class UsersService {
   }
 
   async findOneByPhone(phone: string) {
-    return await this.prisma.user.findFirst({
+    return await this.prisma.users.findFirst({
       where: {
         phone,
       },
@@ -31,7 +31,7 @@ export class UsersService {
   }
 
   async findOneById(id: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.users.findUnique({
       where: {
         id,
       },
@@ -39,8 +39,8 @@ export class UsersService {
     return this.exclude(user, 'password');
   }
 
-  async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
-    const user = await this.prisma.user.update({
+  async update(id: string, updateUserDto: Prisma.UsersUpdateInput) {
+    const user = await this.prisma.users.update({
       where: {
         id,
       },
@@ -53,14 +53,14 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    return await this.prisma.user.delete({
+    return await this.prisma.users.delete({
       where: {
         id,
       },
     });
   }
   // Exclude keys from user
-  exclude(user: User, ...keys: string[]) {
+  exclude(user: Users, ...keys: string[]) {
     for (const key of keys) {
       delete user[key];
     }

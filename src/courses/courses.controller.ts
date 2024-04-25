@@ -10,7 +10,6 @@ import {
   UploadedFile,
   UseInterceptors,
   UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Prisma } from '@prisma/client';
@@ -30,7 +29,7 @@ export class CoursesController {
   @Post('create')
   @UsePipes()
   async create(
-    @Body() createCourseDto: Prisma.CourseCreateInput,
+    @Body() createCourseDto: Prisma.CoursesCreateInput,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
     if (!image) {
@@ -48,7 +47,7 @@ export class CoursesController {
   @Patch('update/:id')
   async update(
     @Param('id') id: string,
-    @Body() updateCourseDto: Prisma.CourseUpdateInput,
+    @Body() updateCourseDto: Prisma.CoursesUpdateInput,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
     if (image) {

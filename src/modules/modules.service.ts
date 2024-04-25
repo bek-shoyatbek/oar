@@ -7,12 +7,12 @@ import { ObjectId } from 'mongodb';
 export class ModulesService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(courseId: string, createModuleDto: Prisma.ModuleCreateInput) {
+  async create(courseId: string, createModuleDto: Prisma.ModulesCreateInput) {
     if (!ObjectId.isValid(courseId)) {
       throw new BadRequestException('Invalid course id');
     }
 
-    const course = await this.prismaService.course.findUnique({
+    const course = await this.prismaService.courses.findUnique({
       where: { id: courseId },
     });
 
@@ -20,7 +20,7 @@ export class ModulesService {
       throw new BadRequestException('Course not found');
     }
 
-    return await this.prismaService.module.create({
+    return await this.prismaService.modules.create({
       data: {
         ...createModuleDto,
         course: {
@@ -32,25 +32,25 @@ export class ModulesService {
     });
   }
   async findAll() {
-    return await this.prismaService.module.findMany();
+    return await this.prismaService.modules.findMany();
   }
   async findOne(id: string) {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid module id');
     }
-    return await this.prismaService.module.findUnique({
+    return await this.prismaService.modules.findUnique({
       where: { id },
       include: {
         Lesson: true,
       },
     });
   }
-  async update(id: string, updateModuleDto: Prisma.ModuleUpdateInput) {
+  async update(id: string, updateModuleDto: Prisma.ModulesUpdateInput) {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid module id');
     }
 
-    const module = await this.prismaService.module.findUnique({
+    const module = await this.prismaService.modules.findUnique({
       where: { id },
     });
 
@@ -58,7 +58,7 @@ export class ModulesService {
       throw new BadRequestException('Module not found');
     }
 
-    return await this.prismaService.module.update({
+    return await this.prismaService.modules.update({
       where: { id },
       data: updateModuleDto,
     });
@@ -68,7 +68,7 @@ export class ModulesService {
       throw new BadRequestException('Invalid module id');
     }
 
-    const module = await this.prismaService.module.findUnique({
+    const module = await this.prismaService.modules.findUnique({
       where: { id },
     });
 
@@ -76,6 +76,6 @@ export class ModulesService {
       throw new BadRequestException('Module not found');
     }
 
-    return await this.prismaService.module.delete({ where: { id } });
+    return await this.prismaService.modules.delete({ where: { id } });
   }
 }

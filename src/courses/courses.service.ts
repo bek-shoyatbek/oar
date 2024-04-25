@@ -6,23 +6,23 @@ import { PrismaService } from 'src/prisma.service';
 export class CoursesService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createCourseDto: Prisma.CourseCreateInput) {
-    return await this.prismaService.course.create({ data: createCourseDto });
+  async create(createCourseDto: Prisma.CoursesCreateInput) {
+    return await this.prismaService.courses.create({ data: createCourseDto });
   }
 
   async findAll() {
-    return await this.prismaService.course.findMany();
+    return await this.prismaService.courses.findMany();
   }
 
   async findOne(id: string) {
-    return await this.prismaService.course.findUnique({
+    return await this.prismaService.courses.findUnique({
       where: { id },
       include: { Module: true },
     });
   }
 
-  async update(id: string, updateCourseDto: Prisma.CourseUpdateInput) {
-    const course = await this.prismaService.course.findUnique({
+  async update(id: string, updateCourseDto: Prisma.CoursesUpdateInput) {
+    const course = await this.prismaService.courses.findUnique({
       where: { id },
     });
 
@@ -30,20 +30,20 @@ export class CoursesService {
       throw new BadRequestException('Course not found');
     }
 
-    return await this.prismaService.course.update({
+    return await this.prismaService.courses.update({
       where: { id },
       data: updateCourseDto,
     });
   }
 
   async remove(id: string) {
-    const course = await this.prismaService.course.findUnique({
+    const course = await this.prismaService.courses.findUnique({
       where: { id },
     });
 
     if (!course) {
       throw new BadRequestException('Course not found');
     }
-    return await this.prismaService.course.delete({ where: { id } });
+    return await this.prismaService.courses.delete({ where: { id } });
   }
 }
