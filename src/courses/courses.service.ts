@@ -10,8 +10,10 @@ export class CoursesService {
     return await this.prismaService.courses.create({ data: createCourseDto });
   }
 
-  async findAll() {
-    return await this.prismaService.courses.findMany();
+  async findAll(courseStatus?: 'completed' | 'inProgress' | 'archived') {
+    return await this.prismaService.courses.findMany({
+      where: courseStatus ? { courseStatus: courseStatus } : {},
+    });
   }
 
   async findOne(id: string) {
