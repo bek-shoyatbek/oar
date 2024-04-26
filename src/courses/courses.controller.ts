@@ -7,9 +7,9 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
-  UsePipes,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Prisma } from '@prisma/client';
@@ -27,7 +27,6 @@ export class CoursesController {
   ) {}
   @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @Post('create')
-  @UsePipes()
   async create(
     @Body() createCourseDto: Prisma.CoursesCreateInput,
     @UploadedFile(getImageValidator()) image: Express.Multer.File,
@@ -60,8 +59,10 @@ export class CoursesController {
   }
 
   @Get('all')
-  async findAll() {
-    return await this.coursesService.findAll();
+  async findAll(
+    @Query('status') courseStatus?: 'completed' | 'inProgress' | 'archived',
+  ) {
+    return await this.coursesService.findAll(courseStatus);
   }
 
   @Get('single/:id')
@@ -70,5 +71,7 @@ export class CoursesController {
   }
 
   @Delete('remove/:id')
-  async delete(@Param('id') id: string) {}
+  async delete(@Param('id') id: string) {
+    return await this.coursesService.remove(id);
+  }
 }
