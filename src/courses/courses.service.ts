@@ -12,7 +12,7 @@ export class CoursesService {
 
   async findAll(courseStatus?: 'completed' | 'inProgress' | 'archived') {
     return await this.prismaService.courses.findMany({
-      where: courseStatus ? { courseStatus } : {},
+      where: courseStatus ? { courseStatus: courseStatus } : {},
     });
   }
 
