@@ -2,11 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ClickRequestDto } from './dto/request.dto';
 import { TransactionActions } from './constants/transaction-actions';
 import { ObjectId } from 'mongodb';
-import { ClickReplyOptionsDto } from './dto/reply.dto';
 import { PrismaService } from 'src/prisma.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateMd5Params } from './interfaces/create-md5.interface';
+import { ClickReplyOption } from './entities/ReplyOption';
 
 @Injectable()
 export class ClickService {
@@ -35,7 +35,7 @@ export class ClickService {
     const isValidSignString = this.verifyMd5Hash(signString, myMd5Hash);
 
     if (!isValidSignString) {
-      const reply = new ClickReplyOptionsDto(
+      const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
@@ -57,7 +57,7 @@ export class ClickService {
     const isValidObjectId = this.checkObjectId(clickReqBody.merchant_trans_id);
 
     if (!isValidObjectId) {
-      const reply = new ClickReplyOptionsDto(
+      const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
@@ -74,7 +74,7 @@ export class ClickService {
     });
 
     if (!isValidPaymentId) {
-      const reply = new ClickReplyOptionsDto(
+      const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
@@ -84,7 +84,7 @@ export class ClickService {
       throw new BadRequestException(reply.getReplyObject());
     }
 
-    const reply = new ClickReplyOptionsDto(
+    const reply = new ClickReplyOption(
       clickReqBody.click_trans_id,
       clickReqBody.merchant_trans_id,
       clickReqBody.merchant_prepare_id,
@@ -97,7 +97,7 @@ export class ClickService {
   async completePayment(clickReqBody: ClickRequestDto) {
     const isValidObjectId = this.checkObjectId(clickReqBody.merchant_trans_id);
     if (!isValidObjectId) {
-      const reply = new ClickReplyOptionsDto(
+      const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
@@ -112,7 +112,7 @@ export class ClickService {
       },
     });
     if (!isValidPaymentId) {
-      const reply = new ClickReplyOptionsDto(
+      const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
@@ -122,7 +122,7 @@ export class ClickService {
       throw new BadRequestException(reply.getReplyObject());
     }
 
-    const reply = new ClickReplyOptionsDto(
+    const reply = new ClickReplyOption(
       clickReqBody.click_trans_id,
       clickReqBody.merchant_trans_id,
       clickReqBody.merchant_prepare_id,

@@ -1,4 +1,4 @@
-export class ClickReplyOptionsDto {
+export class ClickReplyOption {
   click_trans_id: number;
   merchant_trans_id: string;
   merchant_prepare_id: number;
