@@ -48,7 +48,6 @@ model Modules {
   updatedAt     DateTime  @updatedAt
   titleUz       String?
   titleRu       String?
-  image         String?
   descriptionUz String?
   descriptionRu String?
   course        Courses   @relation(fields: [courseId], references: [id])

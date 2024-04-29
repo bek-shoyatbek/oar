@@ -25,18 +25,10 @@ export class ModulesController {
     private readonly s3Service: S3Service,
   ) {}
   @Post('create/:courseId')
-  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   async create(
     @Param('courseId') courseId: string,
     @Body() createModuleDto: Prisma.ModulesCreateInput,
-    @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
-    if (!image) {
-      throw new BadRequestException('image is required');
-    }
-    const fileUrl = await this.s3Service.upload(image);
-    createModuleDto.image = fileUrl;
-
     return await this.modulesService.create(courseId, createModuleDto);
   }
 
@@ -45,17 +37,10 @@ export class ModulesController {
     return await this.modulesService.findOne(params.id);
   }
   @Patch('update/:id')
-  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   async update(
     @Body() updateModuleDto: Prisma.ModulesUpdateInput,
     @Param('id') id: string,
-    @UploadedFile(getImageValidator()) image: Express.Multer.File,
   ) {
-    if (image) {
-      const fileUrl = await this.s3Service.upload(image);
-      updateModuleDto.image = fileUrl;
-    }
-
     return await this.modulesService.update(id, updateModuleDto);
   }
 
