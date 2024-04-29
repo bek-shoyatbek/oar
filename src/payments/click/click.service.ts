@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ClickRequestDto } from './dto/request.dto';
+import { ClickRequestDto } from './dto/click-request.dto';
 import { TransactionActions } from './constants/transaction-actions';
 import { ObjectId } from 'mongodb';
 import { PrismaService } from 'src/prisma.service';

@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ClickService } from './click.service';
-import { ClickRequestDto } from './dto/request.dto';
+import { ClickRequestDto } from './dto/click-request.dto';
 
 @Controller('click')
 export class ClickController {
