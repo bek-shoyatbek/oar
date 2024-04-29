@@ -1,4 +1,8 @@
 {
-  "cSpell.words": ["CLOUDINARY", "streamifier"],
+  "cSpell.words": [
+    "CLOUDINARY",
+    "Payme",
+    "streamifier"
+  ],
   "debug.javascript.autoAttachFilter": "onlyWithFlag"
 }

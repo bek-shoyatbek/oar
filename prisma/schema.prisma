@@ -14,9 +14,9 @@ datasource db {
 }
 
 model Users {
-  id           String         @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   email        String?
   phone        String?
   password     String
@@ -26,20 +26,21 @@ model Users {
   Payment      Payments[]
   Plan         Plans[]
   MyCourse     MyCourses[]
-  Transactions Transactions[]
 }
 
 model Courses {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   titleUz       String?
   titleRu       String?
   image         String?
   descriptionUz String?
   descriptionRu String?
-  Module        Modules[]
-  Plan          Plans[]
+  courseStatus  CourseStatus @default(inProgress)
+
+  Module Modules[]
+  Plan   Plans[]
 }
 
 model Modules {
@@ -70,34 +71,32 @@ model Lessons {
 }
 
 model Payments {
-  id        String            @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  provider  Payment_providers
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  provider  PaymentProviders
   amount    Float
-  user      Users             @relation(fields: [userId], references: [id])
-  userId    String            @db.ObjectId
-  plan      Plans             @relation(fields: [planId], references: [id])
-  planId    String            @db.ObjectId
+  user      Users            @relation(fields: [userId], references: [id])
+  userId    String           @db.ObjectId
+  plan      Plans            @relation(fields: [planId], references: [id])
+  planId    String           @db.ObjectId
 }
 
 model Plans {
-  id               String            @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  provider         Payment_providers
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  provider         PaymentProviders
   available_period Int // in month
   includes         String
   price            Float
-  user             Users             @relation(fields: [userId], references: [id])
-  userId           String            @db.ObjectId
-  course           Courses           @relation(fields: [courseId], references: [id])
-  courseId         String            @db.ObjectId
+  user             Users            @relation(fields: [userId], references: [id])
+  userId           String           @db.ObjectId
+  course           Courses          @relation(fields: [courseId], references: [id])
+  courseId         String           @db.ObjectId
   Payment          Payments[]
-  MyCourse         MyCourses?        @relation(fields: [myCourseId], references: [id])
-  myCourseId       String?           @db.ObjectId
-  Transactions     Transactions?     @relation(fields: [transactionsId], references: [id])
-  transactionsId   String?           @db.ObjectId
+  MyCourse         MyCourses?       @relation(fields: [myCourseId], references: [id])
+  myCourseId       String?          @db.ObjectId
 }
 
 model MyCourses {
@@ -110,19 +109,14 @@ model MyCourses {
   plans  Plans[]
 }
 
-model Transactions {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  amount  Float
-  Users   Users?  @relation(fields: [usersId], references: [id])
-  usersId String? @db.ObjectId
-  Plans   Plans[]
-}
-
-enum Payment_providers {
+enum PaymentProviders {
   payme
   uzum
   click
+}
+
+enum CourseStatus {
+  completed
+  inProgress
+  archived
 }
