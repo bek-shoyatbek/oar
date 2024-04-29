@@ -9,4 +9,5 @@ export class ClickRequestDto {
   error_note: string;
   sign_time: string;
   sign_string: string;
+    merchant_prepare_id: number;
 }

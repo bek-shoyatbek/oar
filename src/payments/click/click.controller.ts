@@ -5,8 +5,8 @@ import { ClickRequestDto } from './dto/request.dto';
 @Controller('click')
 export class ClickController {
   constructor(private readonly clickService: ClickService) {}
-  @Post('merchant')
+  @Post('shop-api')
   async handleMerchantTransactions(@Body() clickReqBody: ClickRequestDto) {
-    return this.clickService.handleMerchantTransactions(clickReqBody);
+    return await this.clickService.handleMerchantTransactions(clickReqBody);
   }
 }
