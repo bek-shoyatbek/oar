@@ -42,6 +42,7 @@ export class ClickService {
         1,
         'Invalid sign_string',
       );
+      console.error('Invalid sign_string', reply.getReplyObject());
       throw new BadRequestException(reply.getReplyObject());
     }
 
@@ -51,6 +52,16 @@ export class ClickService {
     } else if (action == TransactionActions.Complete) {
       return await this.completePayment(clickReqBody);
     }
+
+    const reply = new ClickReplyOption(
+      clickReqBody.click_trans_id,
+      clickReqBody.merchant_trans_id,
+      clickReqBody.merchant_prepare_id,
+      1,
+      'Invalid action',
+    );
+
+    return reply.getReplyObject();
   }
 
   async preparePayment(clickReqBody: ClickRequestDto) {
@@ -64,6 +75,8 @@ export class ClickService {
         1,
         'Invalid merchant_trans_id',
       );
+
+      console.error('Invalid merchant_trans_id', reply.getReplyObject());
       throw new BadRequestException(reply.getReplyObject());
     }
 
@@ -81,6 +94,8 @@ export class ClickService {
         1,
         'Invalid merchant_trans_id',
       );
+
+      console.error('Invalid merchant_trans_id', reply.getReplyObject());
       throw new BadRequestException(reply.getReplyObject());
     }
 
@@ -104,6 +119,8 @@ export class ClickService {
         1,
         'Invalid merchant_trans_id',
       );
+
+      console.error('Invalid merchant_trans_id', reply.getReplyObject());
       throw new BadRequestException(reply.getReplyObject());
     }
     const isValidPaymentId = await this.prismaService.payments.findUnique({
@@ -119,6 +136,8 @@ export class ClickService {
         1,
         'Invalid merchant_trans_id',
       );
+
+      console.error('Invalid merchant_trans_id', reply.getReplyObject());
       throw new BadRequestException(reply.getReplyObject());
     }
 
