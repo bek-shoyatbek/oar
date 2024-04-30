@@ -18,44 +18,39 @@ export class ClickService {
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
-
-    const incomingMd5Hash = clickReqBody.sign_string;
-
-    const myMd5Hash = this.hashingService.md5(
-      `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${clickReqBody.merchant_trans_id}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
+    const merchantTransactionId = clickReqBody.merchant_trans_id;
+    const actionType = +clickReqBody.action;
+    const md5Hash = this.hashingService.md5(
+      `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${merchantTransactionId}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
+    );
+    const isValidSignature = this.verifyMd5Hash(
+      clickReqBody.sign_string,
+      md5Hash,
     );
 
-    const isValidSignString = this.verifyMd5Hash(incomingMd5Hash, myMd5Hash);
-
-    if (!isValidSignString) {
-      const reply = new ClickReplyOption(
-        clickReqBody.click_trans_id,
-        clickReqBody.merchant_trans_id,
-        clickReqBody?.merchant_prepare_id,
-        1,
-        'Invalid sign_string',
-      );
-      console.error('Invalid sign_string', reply.getReplyObject());
-      throw new BadRequestException(reply.getReplyObject());
+    if (!isValidSignature) {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        merchant_prepare_id: clickReqBody.merchant_prepare_id,
+        error_code: 1,
+        error_msg: 'Invalid sign_string',
+      });
     }
 
-    const action = +clickReqBody.action;
-    if (action == TransactionActions.Prepare) {
-      return await this.preparePayment(clickReqBody);
+    if (actionType == TransactionActions.Prepare) {
+      return this.preparePayment(clickReqBody);
+    } else if (actionType == TransactionActions.Complete) {
+      return this.completePayment(clickReqBody);
+    } else {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        merchant_prepare_id: clickReqBody.merchant_prepare_id,
+        error_code: 1,
+        error_msg: 'Invalid action',
+      });
     }
-    if (action == TransactionActions.Complete) {
-      return await this.completePayment(clickReqBody);
-    }
-
-    const reply = new ClickReplyOption(
-      clickReqBody.click_trans_id,
-      clickReqBody.merchant_trans_id,
-      clickReqBody.merchant_prepare_id,
-      1,
-      'Invalid action',
-    );
-
-    return reply.getReplyObject();
   }
 
   async preparePayment(clickReqBody: ClickRequestDto) {

@@ -10,6 +10,7 @@ export class ClickController {
   async handleMerchantTransactions(@Body() clickReqBody: ClickRequestDto) {
     const result =
       await this.clickService.handleMerchantTransactions(clickReqBody);
+    console.log('response', result);
     return result;
   }
 }
