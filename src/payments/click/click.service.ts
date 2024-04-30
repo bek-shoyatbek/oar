@@ -19,7 +19,6 @@ export class ClickService {
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
 
-    console.log('ReqBody', clickReqBody);
     const incomingMd5Hash = clickReqBody.sign_string;
 
     const myMd5Hash = this.hashingService.md5(
@@ -40,10 +39,11 @@ export class ClickService {
       throw new BadRequestException(reply.getReplyObject());
     }
 
-    const action = clickReqBody.action;
+    const action = +clickReqBody.action;
     if (action == TransactionActions.Prepare) {
       return await this.preparePayment(clickReqBody);
-    } else if (action == TransactionActions.Complete) {
+    }
+    if (action == TransactionActions.Complete) {
       return await this.completePayment(clickReqBody);
     }
 
