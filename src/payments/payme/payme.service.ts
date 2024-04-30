@@ -26,4 +26,16 @@ export class PaymeService {
         return 'Invalid transaction method';
     }
   }
+
+  async checkPerformTransaction() {}
+
+  async createTransaction() {}
+
+  async performTransaction() {}
+
+  async cancelTransaction() {}
+
+  async checkTransaction() {}
+
+  async getStatement() {}
 }

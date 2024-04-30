@@ -75,6 +75,7 @@ model Payments {
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
   provider  PaymentProviders
+  transId   String?          @unique
   amount    Float
   status    PaymentStatus    @default(prepare)
   user      Users            @relation(fields: [userId], references: [id])
@@ -114,6 +115,7 @@ enum PaymentStatus {
   prepare
   completed
   failed
+  created
   reversed
 }
 
@@ -127,4 +129,5 @@ enum CourseStatus {
   completed
   inProgress
   archived
+  reversed
 }

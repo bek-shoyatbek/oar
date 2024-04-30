@@ -18,6 +18,8 @@ import { S3Module } from './aws/s3/s3.module';
 import { PaymeModule } from './payments/payme/payme.module';
 import { ClickModule } from './payments/click/click.module';
 import { UzumModule } from './payments/uzum/uzum.module';
+import { ArticlesModule } from './articles/articles.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { UzumModule } from './payments/uzum/uzum.module';
     PaymeModule,
     ClickModule,
     UzumModule,
+    ArticlesModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],
