@@ -174,7 +174,7 @@ export class ClickService {
       const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
-        clickReqBody.merchant_prepare_id,
+        +clickReqBody.merchant_prepare_id,
         1,
         'Invalid merchant_trans_id',
       );
@@ -192,7 +192,7 @@ export class ClickService {
       const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
-        clickReqBody.merchant_prepare_id,
+        +clickReqBody.merchant_prepare_id,
         ClickError.BadRequest,
         'Invalid merchant_trans_id',
       );
@@ -203,7 +203,7 @@ export class ClickService {
 
     const isPrepared = await this.prismaService.payments.findFirst({
       where: {
-        prepareId: clickReqBody.merchant_prepare_id,
+        prepareId: +clickReqBody.merchant_prepare_id,
       },
     });
 
