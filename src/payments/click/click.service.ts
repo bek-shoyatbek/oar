@@ -20,18 +20,11 @@ export class ClickService {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
 
     console.log('ReqBody', clickReqBody);
-    const incomingMd5Hash = this.hashingService.md5(clickReqBody.sign_string);
+    const incomingMd5Hash = clickReqBody.sign_string;
 
-    const myMd5Hash = this.generateMd5Hash({
-      clickTransId: clickReqBody.click_trans_id,
-      serviceId: clickReqBody.service_id,
-      secretKey: secretKey,
-      merchantTransId: clickReqBody.merchant_trans_id,
-      merchantPrepareId: clickReqBody.merchant_prepare_id,
-      amount: clickReqBody.amount,
-      action: clickReqBody.action,
-      signTime: clickReqBody.sign_time,
-    });
+    const myMd5Hash = this.hashingService.md5(
+      `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${clickReqBody.merchant_trans_id}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
+    );
 
     const isValidSignString = this.verifyMd5Hash(incomingMd5Hash, myMd5Hash);
 
