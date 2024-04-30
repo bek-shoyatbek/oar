@@ -17,9 +17,9 @@ export class ClickService {
   ) {}
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
-    const signString = clickReqBody.sign_string;
-
     const secretKey = this.configService.get<string>('CLICK_SECRET_KEY');
+
+    const incomingMd5Hash = this.hashingService.md5(clickReqBody.sign_string);
 
     const myMd5Hash = this.generateMd5Hash({
       clickTransId: clickReqBody.click_trans_id,
@@ -32,13 +32,13 @@ export class ClickService {
       signTime: clickReqBody.sign_time,
     });
 
-    const isValidSignString = this.verifyMd5Hash(signString, myMd5Hash);
+    const isValidSignString = this.verifyMd5Hash(incomingMd5Hash, myMd5Hash);
 
     if (!isValidSignString) {
       const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
-        clickReqBody.merchant_prepare_id,
+        clickReqBody?.merchant_prepare_id,
         1,
         'Invalid sign_string',
       );
