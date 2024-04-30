@@ -15,8 +15,8 @@ export const ClickAction = {
   Complete: 1,
 };
 
-export const TransactionStatus = {
-  Pending: 'PENDING',
-  Paid: 'PAID',
-  Canceled: 'CANCELED',
+export enum PaymentStatus {
+  PENDING,
+  PAID,
+  CANCELED,
 };

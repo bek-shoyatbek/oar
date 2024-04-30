@@ -7,6 +7,7 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { CreateMd5Params } from './interfaces/create-md5.interface';
 import { ClickReplyOption } from './entities/ReplyOption';
+import { ClickError } from 'src/enums/Payment.enum';
 
 @Injectable()
 export class ClickService {
@@ -17,9 +18,36 @@ export class ClickService {
   ) {}
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
+    const merchantTransactionId = clickReqBody.merchant_trans_id;
+
+    const actionType = +clickReqBody.action;
+
+    if (isNaN(actionType)) {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: 1,
+        error_msg: 'Invalid action',
+      });
+    }
+
+    if (actionType == TransactionActions.Prepare) {
+      return this.preparePayment(clickReqBody);
+    } else if (actionType == TransactionActions.Complete) {
+      return this.completePayment(clickReqBody);
+    } else {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: 1,
+        error_msg: 'Invalid action',
+      });
+    }
+  }
+
+  async preparePayment(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
     const merchantTransactionId = clickReqBody.merchant_trans_id;
-    const actionType = +clickReqBody.action;
     const md5Hash = this.hashingService.md5(
       `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${merchantTransactionId}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
     );
@@ -32,41 +60,21 @@ export class ClickService {
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: merchantTransactionId,
-        merchant_prepare_id: clickReqBody.merchant_prepare_id,
         error_code: 1,
         error_msg: 'Invalid sign_string',
       });
     }
 
-    if (actionType == TransactionActions.Prepare) {
-      return this.preparePayment(clickReqBody);
-    } else if (actionType == TransactionActions.Complete) {
-      return this.completePayment(clickReqBody);
-    } else {
-      throw new BadRequestException({
-        click_trans_id: clickReqBody.click_trans_id,
-        merchant_trans_id: merchantTransactionId,
-        merchant_prepare_id: clickReqBody.merchant_prepare_id,
-        error_code: 1,
-        error_msg: 'Invalid action',
-      });
-    }
-  }
-
-  async preparePayment(clickReqBody: ClickRequestDto) {
     const isValidObjectId = this.checkObjectId(clickReqBody.merchant_trans_id);
 
     if (!isValidObjectId) {
-      const reply = new ClickReplyOption(
-        clickReqBody.click_trans_id,
-        clickReqBody.merchant_trans_id,
-        clickReqBody.merchant_prepare_id,
-        1,
-        'Invalid merchant_trans_id',
-      );
-
-      console.error('Invalid merchant_trans_id', reply.getReplyObject());
-      throw new BadRequestException(reply.getReplyObject());
+      console.error('Invalid merchant_trans_id');
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: 1,
+        error_msg: 'Invalid merchant_trans_id',
+      });
     }
 
     const isValidPaymentId = await this.prismaService.payments.findUnique({
@@ -76,24 +84,80 @@ export class ClickService {
     });
 
     if (!isValidPaymentId) {
-      const reply = new ClickReplyOption(
-        clickReqBody.click_trans_id,
-        clickReqBody.merchant_trans_id,
-        clickReqBody.merchant_prepare_id,
-        1,
-        'Invalid merchant_trans_id',
-      );
-
-      console.error('Invalid merchant_trans_id', reply.getReplyObject());
-      throw new BadRequestException(reply.getReplyObject());
+      console.error('Invalid merchant_trans_id');
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: 1,
+        error_msg: 'Invalid merchant_trans_id',
+      });
     }
+
+    const isAlreadyPaid = await this.prismaService.payments.findFirst({
+      where: {
+        id: clickReqBody.merchant_trans_id,
+        status: 'PAID',
+      },
+    });
+
+    if (isAlreadyPaid) {
+      console.error('Already paid');
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: ClickError.AlreadyPaid,
+        error_msg: 'Already paid',
+      });
+    }
+
+    if (
+      clickReqBody.amount < 0 ||
+      clickReqBody.amount != isValidPaymentId.amount
+    ) {
+      console.error('Invalid amount');
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: ClickError.InvalidAmount,
+        error_msg: 'Invalid amount',
+      });
+    }
+
+    if (isValidPaymentId.status == 'PAID') {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: ClickError.AlreadyPaid,
+        error_msg: 'Already paid',
+      });
+    }
+
+    if (isValidPaymentId.status == 'CANCELED') {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: merchantTransactionId,
+        error_code: ClickError.TransactionCanceled,
+        error_msg: 'Already cancelled',
+      });
+    }
+
+    const time = new Date().getTime();
+
+    await this.prismaService.payments.update({
+      where: {
+        id: clickReqBody.merchant_trans_id,
+      },
+      data: {
+        prepareId: time,
+      },
+    });
 
     const reply = new ClickReplyOption(
       clickReqBody.click_trans_id,
       clickReqBody.merchant_trans_id,
-      clickReqBody.merchant_prepare_id,
+      time,
       0,
-      'ok',
+      'Success',
     );
     return reply.getReplyObject();
   }
@@ -122,7 +186,7 @@ export class ClickService {
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
         clickReqBody.merchant_prepare_id,
-        1,
+        ClickError.BadRequest,
         'Invalid merchant_trans_id',
       );
 
@@ -130,13 +194,51 @@ export class ClickService {
       throw new BadRequestException(reply.getReplyObject());
     }
 
-    const reply = new ClickReplyOption(
-      clickReqBody.click_trans_id,
-      clickReqBody.merchant_trans_id,
-      clickReqBody.merchant_prepare_id,
-      0,
-      'Completed',
-    );
+    const isPrepared = await this.prismaService.payments.findFirst({
+      where: {
+        prepareId: clickReqBody.merchant_prepare_id,
+      },
+    });
+
+    if (!isPrepared) {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: clickReqBody.merchant_trans_id,
+        error_code: ClickError.TransactionNotFound,
+        error_msg: 'Invalid merchant_prepare_id',
+      });
+    }
+
+    if (isValidPaymentId.status == 'PAID') {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: clickReqBody.merchant_trans_id,
+        error_code: ClickError.AlreadyPaid,
+        error_msg: 'Already paid',
+      });
+    }
+
+    if (isValidPaymentId.status == 'CANCELED') {
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: clickReqBody.merchant_trans_id,
+        error_code: ClickError.TransactionCanceled,
+        error_msg: 'Already cancelled',
+      });
+    }
+
+    if (
+      clickReqBody.amount < 0 ||
+      clickReqBody.amount != isValidPaymentId.amount
+    ) {
+      console.error('Invalid amount');
+      throw new BadRequestException({
+        click_trans_id: clickReqBody.click_trans_id,
+        merchant_trans_id: clickReqBody.merchant_trans_id,
+        error_code: ClickError.InvalidAmount,
+        error_msg: 'Invalid amount',
+      });
+    }
 
     // update payment status
     await this.prismaService.payments.update({
@@ -144,9 +246,17 @@ export class ClickService {
         id: clickReqBody.merchant_trans_id,
       },
       data: {
-        status: 'completed',
+        status: 'PAID',
       },
     });
+
+    const reply = new ClickReplyOption(
+      clickReqBody.click_trans_id,
+      clickReqBody.merchant_trans_id,
+      clickReqBody.merchant_prepare_id,
+      0,
+      'Success',
+    );
 
     return reply.getReplyObject();
   }

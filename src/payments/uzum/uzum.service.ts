@@ -10,6 +10,8 @@ import { ConfirmTransactionDto } from './dto/confirm-transaction.dto';
 import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
+import { PaymentStatus } from 'src/enums/Payment.enum';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UzumService {
@@ -147,7 +149,7 @@ export class UzumService {
         id: createTransactionDto.params.account,
       },
       data: {
-        status: 'created',
+        status: 'PENDING',
         transId: createTransactionDto.transId,
       },
     });
@@ -198,7 +200,7 @@ export class UzumService {
         transId: confirmTransactionDto.transId,
       },
       data: {
-        status: 'completed',
+        status: 'PAID',
       },
     });
     return {
@@ -241,7 +243,7 @@ export class UzumService {
         transId: reverseTransactionDto.transId,
       },
       data: {
-        status: 'reversed',
+        status: 'CANCELED',
       },
     });
     return {
