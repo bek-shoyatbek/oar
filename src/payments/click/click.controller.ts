@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ClickService } from './click.service';
 import { ClickRequestDto } from './dto/click-request.dto';
 
@@ -6,6 +6,7 @@ import { ClickRequestDto } from './dto/click-request.dto';
 export class ClickController {
   constructor(private readonly clickService: ClickService) {}
   @Post('shop-api')
+  @HttpCode(HttpStatus.OK)
   async handleMerchantTransactions(@Body() clickReqBody: ClickRequestDto) {
     return await this.clickService.handleMerchantTransactions(clickReqBody);
   }
