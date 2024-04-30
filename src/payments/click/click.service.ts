@@ -260,15 +260,15 @@ export class ClickService {
       },
     });
 
-    const reply = new ClickReplyOption(
-      clickReqBody.click_trans_id,
-      clickReqBody.merchant_trans_id,
-      clickReqBody.merchant_prepare_id,
-      0,
-      'Success',
-    );
+    const response = {
+      click_trans_id: +clickReqBody.click_trans_id,
+      merchant_trans_id: clickReqBody.merchant_trans_id,
+      merchant_confirm_id: null,
+      error_code: 0,
+      error_msg: 'Success',
+    };
 
-    return reply.getReplyObject();
+    return response;
   }
 
   checkObjectId(id: string) {
