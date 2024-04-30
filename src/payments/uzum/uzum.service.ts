@@ -148,6 +148,7 @@ export class UzumService {
       },
       data: {
         status: 'created',
+        transId: createTransactionDto.transId,
       },
     });
 
