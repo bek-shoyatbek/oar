@@ -20,9 +20,12 @@ export class ClickService {
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
     const merchantTransactionId = clickReqBody.merchant_trans_id;
 
+    console.log('reqBody', clickReqBody);
+
     const actionType = +clickReqBody.action;
 
     if (isNaN(actionType)) {
+      console.error('Invalid action');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: merchantTransactionId,
@@ -57,6 +60,7 @@ export class ClickService {
     );
 
     if (!isValidSignature) {
+      console.error('Invalid sign_string');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: merchantTransactionId,
@@ -124,6 +128,7 @@ export class ClickService {
     }
 
     if (isValidPaymentId.status == 'PAID') {
+      console.error('Already paid');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: merchantTransactionId,
@@ -133,6 +138,7 @@ export class ClickService {
     }
 
     if (isValidPaymentId.status == 'CANCELED') {
+      console.error('Already cancelled');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: merchantTransactionId,
@@ -182,6 +188,7 @@ export class ClickService {
       },
     });
     if (!isValidPaymentId) {
+      console.error('Invalid merchant_trans_id');
       const reply = new ClickReplyOption(
         clickReqBody.click_trans_id,
         clickReqBody.merchant_trans_id,
@@ -201,6 +208,7 @@ export class ClickService {
     });
 
     if (!isPrepared) {
+      console.error('Invalid merchant_prepare_id');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: clickReqBody.merchant_trans_id,
@@ -210,6 +218,7 @@ export class ClickService {
     }
 
     if (isValidPaymentId.status == 'PAID') {
+      console.error('Already paid');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: clickReqBody.merchant_trans_id,
@@ -219,6 +228,7 @@ export class ClickService {
     }
 
     if (isValidPaymentId.status == 'CANCELED') {
+      console.error('Already cancelled');
       throw new BadRequestException({
         click_trans_id: clickReqBody.click_trans_id,
         merchant_trans_id: clickReqBody.merchant_trans_id,

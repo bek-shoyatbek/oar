@@ -10,8 +10,6 @@ import { ConfirmTransactionDto } from './dto/confirm-transaction.dto';
 import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
-import { PaymentStatus } from 'src/enums/Payment.enum';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UzumService {
