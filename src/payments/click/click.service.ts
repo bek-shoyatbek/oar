@@ -19,6 +19,7 @@ export class ClickService {
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
 
+    console.log('ReqBody', clickReqBody);
     const incomingMd5Hash = this.hashingService.md5(clickReqBody.sign_string);
 
     const myMd5Hash = this.generateMd5Hash({
