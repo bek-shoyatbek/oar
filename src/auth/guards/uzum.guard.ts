@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 
 @Injectable()
-export class BasicAuthGuardPayme implements CanActivate {
+export class UzumBasicAuthGuard implements CanActivate {
   constructor(private configService: ConfigService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,9 +25,9 @@ export class BasicAuthGuardPayme implements CanActivate {
       const [username, password] = decoded.split(':');
 
       const isValidUsername =
-        this.configService.get<string>('PAYME_LOGIN') === username;
+        this.configService.get<string>('UZUM_USERNAME') === username;
       const isValidPassword =
-        this.configService.get<string>('PAYME_PASSWORD_TEST') === password;
+        this.configService.get<string>('UZUM_PASSWORD') === password;
 
       if (!isValidUsername || !isValidPassword) {
         throw new UnauthorizedException();
