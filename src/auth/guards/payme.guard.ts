@@ -22,7 +22,12 @@ export class PaymeBasicAuthGuard implements CanActivate {
       if (!decoded)
         throw new UnauthorizedException("Basic token doesn't exist");
 
+      console.log('decoded', decoded);
       const [username, password] = decoded.split(':');
+
+      console.log('username', username, 'password', password);
+      console.log(this.configService.get<string>('PAYME_LOGIN'));
+      console.log(this.configService.get<string>('PAYME_PASSWORD_TEST'));
 
       const isValidUsername =
         this.configService.get<string>('PAYME_LOGIN') === username;
