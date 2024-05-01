@@ -4,4 +4,5 @@ export enum TransactionMethods {
   CheckTransaction = 'CheckTransaction',
   PerformTransaction = 'PerformTransaction',
   CancelTransaction = 'CancelTransaction',
+  GetStatement = 'GetStatement',
 }
