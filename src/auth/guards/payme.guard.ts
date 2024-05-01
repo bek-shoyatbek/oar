@@ -16,7 +16,14 @@ export class PaymeBasicAuthGuard implements CanActivate {
     const response = context.switchToHttp().getResponse<Response>();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException("Token doesn't exist");
+      response.status(200).send({
+        id: request.body.id,
+        error: {
+          code: -32504,
+          message: 'Insufficient privileges to perform this operation',
+        },
+      });
+      return;
     }
     try {
       const decoded = this.decodeToken(token);
