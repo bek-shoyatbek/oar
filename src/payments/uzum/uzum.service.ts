@@ -132,7 +132,7 @@ export class UzumService {
       });
     }
     log(plan.price, createTransactionDto.amount);
-    const isValidAmount = plan.price === createTransactionDto.amount;
+    const isValidAmount = plan.price === createTransactionDto.amount / 100; // convert cents to dollars
     if (!isValidAmount) {
       error('Invalid amount');
       throw new BadRequestException({
