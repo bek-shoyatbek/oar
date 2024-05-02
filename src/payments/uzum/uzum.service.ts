@@ -346,6 +346,6 @@ export class UzumService {
   private checkServiceId(serviceId: number) {
     const myServiceId = this.configService.get<number>('UZUM_SERVICE_ID');
 
-    return serviceId === myServiceId;
+    return serviceId === +myServiceId;
   }
 }
