@@ -18,22 +18,22 @@ export class UzumService {
     private readonly configService: ConfigService,
   ) {}
   async check(checkTransactionDto: CheckTransactionDto) {
-    const isValidServiceId =
-      this.configService.get('UZUM_SERVICE_ID') ===
-      checkTransactionDto.serviceId;
+    const isValidServiceId = this.checkServiceId(checkTransactionDto.serviceId);
 
     if (!isValidServiceId) {
+      error('Invalid service id');
       throw new BadRequestException({
         serviceId: checkTransactionDto.serviceId,
         timestamp: new Date().valueOf(),
         status: ResponseStatus.Failed,
-        errorCode: ErrorStatusCode.InvalidServiceId,
+        errorCode: ErrorStatusCode.ErrorCheckingPaymentData,
       });
     }
 
     const isValidObjectId = ObjectId.isValid(checkTransactionDto.params.planId);
 
     if (!isValidObjectId) {
+      error('Invalid plan id');
       throw new BadRequestException({
         serviceId: checkTransactionDto.serviceId,
         timestamp: new Date().valueOf(),
@@ -49,6 +49,7 @@ export class UzumService {
     });
 
     if (!plan) {
+      error('Plan not found');
       throw new BadRequestException({
         serviceId: checkTransactionDto.serviceId,
         timestamp: new Date().valueOf(),
@@ -75,6 +76,7 @@ export class UzumService {
     );
 
     if (!isValidServiceId) {
+      error('Invalid service id');
       throw new BadRequestException({
         serviceId: createTransactionDto.serviceId,
         timestamp: new Date().valueOf(),
@@ -192,6 +194,7 @@ export class UzumService {
     );
 
     if (!isValidServiceId) {
+      error('Invalid service id');
       throw new BadRequestException({
         serviceId: confirmTransactionDto.serviceId,
         transId: confirmTransactionDto.transId,
@@ -208,6 +211,7 @@ export class UzumService {
     });
 
     if (!transaction) {
+      error('Invalid transaction id');
       throw new BadRequestException({
         serviceId: confirmTransactionDto.serviceId,
         transId: confirmTransactionDto.transId,
@@ -218,6 +222,7 @@ export class UzumService {
     }
 
     if (transaction.status !== 'PENDING') {
+      error('Payment already processed');
       throw new BadRequestException({
         serviceId: confirmTransactionDto.serviceId,
         transId: confirmTransactionDto.transId,
@@ -228,6 +233,7 @@ export class UzumService {
     }
 
     if (transaction.provider !== 'uzum') {
+      error('Payment already processed');
       throw new BadRequestException({
         serviceId: confirmTransactionDto.serviceId,
         transId: confirmTransactionDto.transId,
@@ -259,6 +265,7 @@ export class UzumService {
       reverseTransactionDto.serviceId,
     );
     if (!isValidServiceId) {
+      error('Invalid service id');
       throw new BadRequestException({
         serviceId: reverseTransactionDto.serviceId,
         transId: reverseTransactionDto.transId,
@@ -274,6 +281,7 @@ export class UzumService {
     });
 
     if (!transaction) {
+      error('Invalid transaction id');
       throw new BadRequestException({
         serviceId: reverseTransactionDto.serviceId,
         transId: reverseTransactionDto.transId,
@@ -304,6 +312,7 @@ export class UzumService {
     const isValidServiceId = this.checkServiceId(checkTransactionDto.serviceId);
 
     if (!isValidServiceId) {
+      error('Invalid service id');
       throw new BadRequestException({
         serviceId: checkTransactionDto.serviceId,
         transId: checkTransactionDto.transId,
@@ -319,6 +328,7 @@ export class UzumService {
     });
 
     if (!transaction) {
+      error('Invalid transaction id');
       throw new BadRequestException({
         serviceId: checkTransactionDto.serviceId,
         transId: checkTransactionDto.transId,
@@ -334,6 +344,6 @@ export class UzumService {
   }
 
   private checkServiceId(serviceId: number) {
-    return this.configService.get('UZUM_SERVICE_ID') === serviceId;
+    return this.configService.get('UZUM_SERVICE_ID') === +serviceId;
   }
 }
