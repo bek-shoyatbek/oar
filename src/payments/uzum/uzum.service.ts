@@ -9,7 +9,7 @@ import { ConfirmTransactionDto } from './dto/confirm-transaction.dto';
 import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
-import { error, log } from 'console';
+import { error, info, log } from 'console';
 
 @Injectable()
 export class UzumService {
@@ -29,6 +29,8 @@ export class UzumService {
         errorCode: ErrorStatusCode.ErrorCheckingPaymentData,
       });
     }
+
+    info('checkTransactionDto', checkTransactionDto);
 
     const isValidObjectId = ObjectId.isValid(checkTransactionDto.params.planId);
 
@@ -84,6 +86,7 @@ export class UzumService {
         errorCode: ErrorStatusCode.ErrorCheckingPaymentData,
       });
     }
+    info('createTransactionDto', createTransactionDto);
 
     const isExistingTransaction =
       await this.prismaService.transactions.findUnique({
@@ -204,6 +207,8 @@ export class UzumService {
       });
     }
 
+    info('confirmTransactionDto', confirmTransactionDto);
+
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: confirmTransactionDto.transId,
@@ -274,6 +279,9 @@ export class UzumService {
         errorCode: ErrorStatusCode.InvalidServiceId,
       });
     }
+
+    info('reverseTransactionDto', reverseTransactionDto);
+
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: reverseTransactionDto.transId,
@@ -320,6 +328,8 @@ export class UzumService {
         errorCode: ErrorStatusCode.InvalidServiceId,
       });
     }
+
+    info('checkTransactionDto', checkTransactionDto);
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
