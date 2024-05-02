@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { UzumService } from './uzum.service';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -13,30 +20,35 @@ export class UzumController {
 
   @UseGuards(UzumBasicAuthGuard)
   @Post('check')
+  @HttpCode(HttpStatus.OK)
   async check(@Body() checkTransactionDto: CheckTransactionDto) {
     return await this.uzumService.check(checkTransactionDto);
   }
 
   @UseGuards(UzumBasicAuthGuard)
   @Post('create')
+  @HttpCode(HttpStatus.OK)
   async create(@Body() createTransactionDto: CreateTransactionDto) {
     return await this.uzumService.create(createTransactionDto);
   }
 
   @UseGuards(UzumBasicAuthGuard)
   @Post('confirm')
+  @HttpCode(HttpStatus.OK)
   async confirm(@Body() confirmTransactionDto: ConfirmTransactionDto) {
     return await this.uzumService.confirm(confirmTransactionDto);
   }
 
   @UseGuards(UzumBasicAuthGuard)
   @Post('reverse')
+  @HttpCode(HttpStatus.OK)
   async reverse(@Body() reverseTransactionDto: ReverseTransactionDto) {
     return await this.uzumService.reverse(reverseTransactionDto);
   }
 
   @UseGuards(UzumBasicAuthGuard)
   @Post('status')
+  @HttpCode(HttpStatus.OK)
   async status(@Body() checkTransactionStatusDto: CheckTransactionStatusDto) {
     return await this.uzumService.status(checkTransactionStatusDto);
   }

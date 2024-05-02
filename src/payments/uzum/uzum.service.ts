@@ -63,7 +63,7 @@ export class UzumService {
       status: ResponseStatus.Ok,
       data: {
         account: {
-          planId: checkTransactionDto.params.planId,
+          value: checkTransactionDto.params.planId,
         },
       },
     };
