@@ -7,12 +7,12 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Post('create')
-  async create(@Body() createPaymentDto: Prisma.PaymentsCreateInput) {
+  async create(@Body() createPaymentDto: Prisma.TransactionsCreateInput) {
     return await this.paymentsService.create(createPaymentDto);
   }
 
   @Get('all')
-  async getAll(@Query() query: Prisma.PaymentsFindManyArgs) {
+  async getAll(@Query() query: Prisma.TransactionsFindManyArgs) {
     return await this.paymentsService.getAll(query);
   }
 

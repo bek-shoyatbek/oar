@@ -5,7 +5,7 @@ export class CheckPerformTransactionDto {
   params: {
     amount: number;
     account: {
-      transactionId: string;
+      planId: string;
     };
   };
 }

@@ -6,16 +6,18 @@ import { PrismaService } from 'src/prisma.service';
 export class PaymentsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createPaymentDto: Prisma.PaymentsCreateInput) {
-    return await this.prismaService.payments.create({ data: createPaymentDto });
+  async create(createPaymentDto: Prisma.TransactionsCreateInput) {
+    return await this.prismaService.transactions.create({
+      data: createPaymentDto,
+    });
   }
 
-  async getAll(query: Prisma.PaymentsFindManyArgs) {
-    return await this.prismaService.payments.findMany(query);
+  async getAll(query: Prisma.TransactionsFindManyArgs) {
+    return await this.prismaService.transactions.findMany(query);
   }
 
   async check(id: string) {
-    const payment = await this.prismaService.payments.findUnique({
+    const payment = await this.prismaService.transactions.findUnique({
       where: { id },
     });
     if (!payment) {

@@ -7,7 +7,8 @@ export class CreateTransactionDto {
     time: number;
     amount: number;
     account: {
-      transactionId: string;
+      user_id: string;
+      plan_id: string;
     };
   };
 }

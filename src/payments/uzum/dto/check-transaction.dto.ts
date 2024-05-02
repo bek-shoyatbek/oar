@@ -2,7 +2,7 @@ export class CheckTransactionDto {
   serviceId: number;
   timestamp: number;
   params: {
-    account: string;
+    planId: string;
     [key: string]: any;
   };
 }
