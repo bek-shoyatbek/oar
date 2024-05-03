@@ -123,15 +123,15 @@ model Articles {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  titleUz String
-  titleRu String
-
+  titleUz     String
+  titleRu     String
   headlineUz  String
   headlineRu  String
   textUz      String
   textRu      String
   imageWeb    String
   imageMobile String
+  isPublished Boolean
 }
 
 model Banners {

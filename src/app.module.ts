@@ -20,6 +20,8 @@ import { ClickModule } from './payments/click/click.module';
 import { UzumModule } from './payments/uzum/uzum.module';
 import { ArticlesModule } from './articles/articles.module';
 import { PaymentsModule } from './payments/payments.module';
+import { BannersModule } from './banners/banners.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { PaymentsModule } from './payments/payments.module';
     UzumModule,
     ArticlesModule,
     PaymentsModule,
+    BannersModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

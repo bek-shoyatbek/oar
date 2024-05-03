@@ -11,22 +11,23 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { ArticlesService } from './articles.service';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { BannersService } from './banners.service';
 import { Prisma } from '@prisma/client';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/aws/s3/s3.service';
 
-@Controller('articles')
-export class ArticlesController {
+@Controller('banners')
+export class BannersController {
   constructor(
-    private readonly articlesService: ArticlesService,
+    private readonly bannersService: BannersService,
     private readonly s3Service: S3Service,
   ) {}
+
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))
   async create(
+    @Body() createBannerDto: Prisma.BannersCreateInput,
     @UploadedFiles() images: Express.Multer.File[],
-    @Body() createArticleDto: Prisma.ArticlesCreateInput,
   ) {
     if (!images || images.length < 2) {
       throw new BadRequestException('images are required');
@@ -36,44 +37,38 @@ export class ArticlesController {
       images.map(async (image) => await this.s3Service.upload(image)),
     );
 
-    createArticleDto.imageWeb = imageWebURL;
+    createBannerDto.imageWeb = imageWebURL;
 
-    createArticleDto.imageMobile = imageMobileURL;
+    createBannerDto.imageMobile = imageMobileURL;
 
-    return await this.articlesService.create(createArticleDto);
+    return await this.bannersService.create(createBannerDto);
   }
 
   @Patch('update/:id')
   @UseInterceptors(FilesInterceptor('images'))
   async update(
-    @Body() updateArticleDto: Prisma.ArticlesUpdateInput,
     @UploadedFiles() images: Express.Multer.File[],
     @Param('id') id: string,
+    @Body() updateBannerDto: Prisma.BannersUpdateInput,
   ) {
     if (images && images.length == 2) {
       const [imageWebURL, imageMobileURL] = await Promise.all(
         images.map(async (image) => await this.s3Service.upload(image)),
       );
 
-      updateArticleDto.imageWeb = imageWebURL;
-
-      updateArticleDto.imageMobile = imageMobileURL;
+      updateBannerDto.imageWeb = imageWebURL;
+      updateBannerDto.imageMobile = imageMobileURL;
     }
-    return await this.articlesService.update(id, updateArticleDto);
+    return await this.bannersService.update(id, updateBannerDto);
   }
 
-  @Get('all')
+  @Delete('delete/:id')
+  async delete(@Param('id') id: string) {
+    return await this.bannersService.remove(id);
+  }
+
+  @Get('findAll')
   async findAll(@Query('isPublished') isPublished: boolean) {
-    return await this.articlesService.findAll(isPublished);
-  }
-
-  @Get('single/:id')
-  async findOne(@Param('id') id: string) {
-    return await this.articlesService.findOne(id);
-  }
-
-  @Delete('remove/:id')
-  async remove(@Param('id') id: string) {
-    return await this.articlesService.remove(id);
+    return await this.bannersService.findAll(isPublished);
   }
 }
