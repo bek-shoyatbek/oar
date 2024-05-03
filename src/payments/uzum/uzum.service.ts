@@ -248,6 +248,28 @@ export class UzumService {
       });
     }
 
+    const plan = await this.prismaService.plans.findUnique({
+      where: {
+        id: transaction.planId,
+      },
+    });
+
+    await this.prismaService.myCourses.update({
+      where: {
+        userId: transaction.userId,
+      },
+      data: {
+        courseIds: {
+          push: plan.courseId,
+        },
+        plans: {
+          connect: {
+            id: plan.id,
+          },
+        },
+      },
+    });
+
     await this.prismaService.transactions.update({
       where: {
         transId: confirmTransactionDto.transId,
