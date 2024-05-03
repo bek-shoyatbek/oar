@@ -116,6 +116,44 @@ model MyCourses {
   plans  Plans[]
 }
 
+model Articles {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  titleUz String
+  titleRu String
+
+  headlineUz  String
+  headlineRu  String
+  textUz      String
+  textRu      String
+  imageWeb    String
+  imageMobile String
+}
+
+model Banners {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  imageWeb    String
+  imageMobile String
+  link        String
+  isPublished Boolean @default(false)
+}
+
+model Comments {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  username    String
+  userAvatar  String
+  text        String
+  isPublished Boolean @default(false)
+}
+
 enum TransactionStatus {
   PENDING
   CREATED
