@@ -39,7 +39,6 @@ model Courses {
   courseStatus  CourseStatus @default(inProgress)
 
   Module Modules[]
-  Plan   Plans[]
 
   MyCourses   MyCourses? @relation(fields: [myCoursesId], references: [id])
   myCoursesId String?    @db.ObjectId
@@ -95,12 +94,11 @@ model Plans {
   includes         String
   price            Float
 
-  course   Courses @relation(fields: [courseId], references: [id])
-  courseId String  @db.ObjectId
+  courseId String @db.ObjectId
 
   Transactions Transactions[]
-  MyCourses    MyCourses?     @relation(fields: [myCoursesId], references: [id])
-  myCoursesId  String?        @db.ObjectId
+  coursesId    String?        @db.ObjectId
+  MyCourses    MyCourses[]
 }
 
 model MyCourses {
@@ -108,12 +106,16 @@ model MyCourses {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  courseIds String[]  @db.ObjectId
-  courses   Courses[]
+  courseId String @db.ObjectId
 
-  user   Users   @relation(fields: [userId], references: [id])
-  userId String  @unique @db.ObjectId
-  plans  Plans[]
+  planId String @db.ObjectId
+
+  plan Plans @relation(fields: [planId], references: [id])
+
+  user   Users  @relation(fields: [userId], references: [id])
+  userId String @unique @db.ObjectId
+
+  Courses Courses[]
 }
 
 model Articles {

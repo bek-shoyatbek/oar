@@ -218,9 +218,7 @@ export class ClickService {
         userId: transaction.userId,
       },
       data: {
-        courseIds: {
-          push: plan.courseId,
-        },
+        courseId: plan.courseId,
       },
     });
 

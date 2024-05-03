@@ -259,14 +259,8 @@ export class UzumService {
         userId: transaction.userId,
       },
       data: {
-        courseIds: {
-          push: plan.courseId,
-        },
-        plans: {
-          connect: {
-            id: plan.id,
-          },
-        },
+        courseId: plan.courseId,
+        planId: transaction.planId,
       },
     });
 
