@@ -141,7 +141,7 @@ export class PaymeService {
       {
         where: {
           userId: createTransactionDto.params.account.user_id,
-          planId: createTransactionDto.params.account.plan_id,
+          planId: createTransactionDto.params.account.planId,
         },
       },
     );
@@ -173,7 +173,7 @@ export class PaymeService {
         },
         plan: {
           connect: {
-            id: createTransactionDto.params.account.plan_id,
+            id: createTransactionDto.params.account.planId,
           },
         },
         provider: 'payme',
