@@ -87,14 +87,14 @@ model Transactions {
 }
 
 model Plans {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   available_period Int // in month
   includes         String
   price            Float
-
-  courseId String @db.ObjectId
+  courseId         String @db.ObjectId
 
   Transactions Transactions[]
   coursesId    String?        @db.ObjectId
@@ -106,16 +106,12 @@ model MyCourses {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  courseId String @db.ObjectId
-
-  planId String @db.ObjectId
-
-  plan Plans @relation(fields: [planId], references: [id])
-
-  user   Users  @relation(fields: [userId], references: [id])
-  userId String @unique @db.ObjectId
-
-  Courses Courses[]
+  courseId String    @db.ObjectId
+  planId   String    @db.ObjectId
+  plan     Plans     @relation(fields: [planId], references: [id])
+  user     Users     @relation(fields: [userId], references: [id])
+  userId   String    @unique @db.ObjectId
+  Courses  Courses[]
 }
 
 model Articles {

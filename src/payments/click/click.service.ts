@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ClickRequestDto } from './dto/click-request.dto';
 import { TransactionActions } from './constants/transaction-actions';
 import { ObjectId } from 'mongodb';
@@ -43,9 +43,10 @@ export class ClickService {
 
   async preparePayment(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
-    const merchantTransactionId = clickReqBody.merchant_trans_id;
+    const planId = clickReqBody.merchant_trans_id;
+    const userId = clickReqBody.param2;
     const md5Hash = this.hashingService.md5(
-      `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${merchantTransactionId}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
+      `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${planId}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
     );
     const isValidSignature = this.verifyMd5Hash(
       clickReqBody.sign_string,
@@ -60,34 +61,36 @@ export class ClickService {
       };
     }
 
-    const isValidObjectId = this.checkObjectId(clickReqBody.merchant_trans_id);
+    const isValidPlanId = this.checkObjectId(planId);
 
-    if (!isValidObjectId) {
-      console.error('Invalid merchant_trans_id');
+    const isValidUserId = this.checkObjectId(userId);
+
+    if (!isValidPlanId || !isValidUserId) {
+      console.error('Invalid planId or userId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid merchant_trans_id',
+        error_msg: 'Invalid planId or userId',
       };
     }
 
     const plan = await this.prismaService.plans.findUnique({
       where: {
-        id: clickReqBody.merchant_trans_id,
+        id: planId,
       },
     });
 
     if (!plan) {
-      console.error('Invalid merchant_trans_id');
+      console.error('Invalid planId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid merchant_trans_id',
+        error_msg: 'Invalid planId',
       };
     }
 
     const isAlreadyPaid = await this.prismaService.transactions.findFirst({
       where: {
-        userId: clickReqBody.merchant_user_id,
-        planId: clickReqBody.merchant_trans_id,
+        userId: userId,
+        planId: planId,
         status: 'PAID',
       },
     });
@@ -119,7 +122,7 @@ export class ClickService {
         },
         user: {
           connect: {
-            id: clickReqBody.merchant_user_id,
+            id: userId,
           },
         },
         prepareId: time,
@@ -132,7 +135,7 @@ export class ClickService {
 
     return {
       click_trans_id: clickReqBody.click_trans_id,
-      merchant_trans_id: clickReqBody.merchant_trans_id,
+      merchant_trans_id: planId,
       merchant_prepare_id: time,
       error: ClickError.Success,
       error_note: 'Success',
@@ -140,32 +143,38 @@ export class ClickService {
   }
 
   async completePayment(clickReqBody: ClickRequestDto) {
-    const isValidObjectId = this.checkObjectId(clickReqBody.merchant_trans_id);
-    if (!isValidObjectId) {
-      console.error('Invalid merchant_trans_id');
+    const planId = clickReqBody.merchant_trans_id;
+    const userId = clickReqBody.param2;
+
+    const isValidPlanId = this.checkObjectId(planId);
+
+    const isValidUserId = this.checkObjectId(userId);
+
+    if (!isValidPlanId || !isValidUserId) {
+      console.error('Invalid planId or userId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid merchant_trans_id',
+        error_msg: 'Invalid planId or userId',
       };
     }
 
     const plan = await this.prismaService.plans.findUnique({
       where: {
-        id: clickReqBody.merchant_trans_id,
+        id: planId,
       },
     });
 
     if (!plan) {
-      console.error('Invalid merchant_trans_id');
+      console.error('Invalid planId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid merchant_trans_id',
+        error_msg: 'Invalid planId',
       };
     }
 
     const transaction = await this.prismaService.transactions.findFirst({
       where: {
-        planId: clickReqBody.merchant_trans_id,
+        planId,
         prepareId: +clickReqBody.merchant_prepare_id,
         status: 'PENDING',
       },
