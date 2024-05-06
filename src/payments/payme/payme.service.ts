@@ -55,25 +55,37 @@ export class PaymeService {
   ) {
     const planId = checkPerformTransactionDto.params?.account?.planId;
 
-    const plain = await this.prismaService.plans.findUnique({
+    const plan = await this.prismaService.plans.findUnique({
       where: {
         id: planId,
       },
     });
 
-    if (!plain) {
+    if (!plan) {
       return {
-        code: ErrorStatusCodes.PayerAccountNotFound,
-        message: 'Payer account not found',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.PayerAccountNotFound,
+          message: {
+            uz: 'mahsulot topilmadi',
+            en: 'Order not found',
+            ru: 'Товар не найден',
+          },
+          data: null,
+        },
       };
     }
 
-    if (plain.price !== checkPerformTransactionDto.params.amount) {
+    if (plan.price !== checkPerformTransactionDto.params.amount) {
       return {
-        code: ErrorStatusCodes.InvalidAmount,
-        message: 'Invalid amount',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.InvalidAmount,
+          message: {
+            uz: 'Noto`g`ri summa',
+            en: 'Invalid amount',
+            ru: 'Недопустимая сумма',
+          },
+          data: null,
+        },
       };
     }
     return {
@@ -103,9 +115,15 @@ export class PaymeService {
     if (transaction) {
       if (transaction.status !== 'PENDING')
         return {
-          code: ErrorStatusCodes.OperationCannotBePerformed,
-          message: 'Transaction already created',
-          data: null,
+          error: {
+            code: ErrorStatusCodes.OperationCannotBePerformed,
+            message: {
+              uz: 'Transaksiya bekor qilindi',
+              en: 'Transaction canceled',
+              ru: 'Транзакция отменена',
+            },
+            data: null,
+          },
         };
       const currentTime = Date.now();
 
@@ -122,9 +140,15 @@ export class PaymeService {
           },
         });
         return {
-          code: ErrorStatusCodes.OperationCannotBePerformed,
-          message: 'Transaction expired',
-          data: null,
+          error: {
+            code: ErrorStatusCodes.OperationCannotBePerformed,
+            message: {
+              uz: 'Transaksiya bekor qilindi',
+              en: 'Transaction canceled',
+              ru: 'Транзакция отменена',
+            },
+            data: null,
+          },
         };
       }
 
@@ -149,16 +173,28 @@ export class PaymeService {
     if (existingTransaction) {
       if (existingTransaction.status == 'PAID') {
         return {
-          code: ErrorStatusCodes.OrderCompleted,
-          message: 'Transaction already created',
-          data: null,
+          error: {
+            code: ErrorStatusCodes.OrderCompleted,
+            message: {
+              uz: 'Buyurtma allaqachon bajarildi',
+              en: 'Order already completed',
+              ru: 'Заказ уже завершен',
+            },
+            data: null,
+          },
         };
       }
       if (existingTransaction.status === 'PENDING') {
         return {
-          code: ErrorStatusCodes.OperationCannotBePerformed,
-          message: 'Transaction already created',
-          data: null,
+          error: {
+            code: ErrorStatusCodes.OperationCannotBePerformed,
+            message: {
+              uz: 'Bu operatsiya bajarilmadi',
+              en: 'Operation cannot be performed',
+              ru: 'Операция не может быть выполнена',
+            },
+            data: null,
+          },
         };
       }
     }
@@ -206,18 +242,30 @@ export class PaymeService {
 
     if (!transaction) {
       return {
-        code: ErrorStatusCodes.TransactionNotFound,
-        message: 'Invalid transaction',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.TransactionNotFound,
+          message: {
+            uz: 'Transaksiya topilmadi',
+            en: 'Transaction not found',
+            ru: 'Транзакция не найдена',
+          },
+          data: null,
+        },
       };
     }
 
     if (transaction.status !== 'PENDING') {
       if (transaction.status !== 'PAID') {
         return {
-          code: ErrorStatusCodes.OperationCannotBePerformed,
-          message: 'Transaction already paid',
-          data: null,
+          error: {
+            code: ErrorStatusCodes.OperationCannotBePerformed,
+            message: {
+              uz: 'Transaksiyani amal qilishga ruxsat berilmadi',
+              en: 'Transaction cannot be performed',
+              ru: 'Транзакция не может быть выполнена',
+            },
+            data: null,
+          },
         };
       }
 
@@ -241,9 +289,15 @@ export class PaymeService {
         },
       });
       return {
-        code: ErrorStatusCodes.OperationCannotBePerformed,
-        message: 'Transaction expired',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.OperationCannotBePerformed,
+          message: {
+            uz: 'Transaksiyani amal qilishga ruxsat berilmadi',
+            en: 'Transaction cannot be performed',
+            ru: 'Транзакция не может быть выполнена',
+          },
+          data: null,
+        },
       };
     }
 
@@ -301,17 +355,29 @@ export class PaymeService {
 
     if (!transaction) {
       return {
-        code: ErrorStatusCodes.TransactionNotFound,
-        message: 'Invalid transaction',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.TransactionNotFound,
+          message: {
+            uz: 'Transaksiya topilmadi',
+            en: 'Transaction not found',
+            ru: 'Транзакция не найдена',
+          },
+          data: null,
+        },
       };
     }
 
     if (transaction.status === 'CANCELED') {
       return {
-        code: ErrorStatusCodes.SystemError,
-        message: 'Transaction already cancelled',
-        data: null,
+        error: {
+          code: ErrorStatusCodes.TransactionNotAllowed,
+          message: {
+            uz: 'Transaksiya bekor qilingan',
+            en: 'Transaction canceled',
+            ru: 'Транзакция отменена',
+          },
+          data: null,
+        },
       };
     }
 
