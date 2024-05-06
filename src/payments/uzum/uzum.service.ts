@@ -321,6 +321,12 @@ export class UzumService {
       });
     }
 
+    await this.prismaService.myCourses.delete({
+      where: {
+        userId: transaction.userId,
+      },
+    });
+
     await this.prismaService.transactions.update({
       where: {
         transId: reverseTransactionDto.transId,

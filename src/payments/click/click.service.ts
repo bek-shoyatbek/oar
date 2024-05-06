@@ -30,9 +30,9 @@ export class ClickService {
     }
 
     if (actionType == TransactionActions.Prepare) {
-      return this.preparePayment(clickReqBody);
+      return this.prepare(clickReqBody);
     } else if (actionType == TransactionActions.Complete) {
-      return this.completePayment(clickReqBody);
+      return this.complete(clickReqBody);
     } else {
       return {
         error_code: ClickError.ActionNotFound,
@@ -41,7 +41,7 @@ export class ClickService {
     }
   }
 
-  async preparePayment(clickReqBody: ClickRequestDto) {
+  async prepare(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
@@ -142,7 +142,7 @@ export class ClickService {
     };
   }
 
-  async completePayment(clickReqBody: ClickRequestDto) {
+  async complete(clickReqBody: ClickRequestDto) {
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
 
@@ -222,11 +222,18 @@ export class ClickService {
       },
     });
 
-    await this.prismaService.myCourses.update({
-      where: {
-        userId: transaction.userId,
-      },
+    await this.prismaService.myCourses.create({
       data: {
+        user: {
+          connect: {
+            id: transaction.userId,
+          },
+        },
+        plan: {
+          connect: {
+            id: transaction.planId,
+          },
+        },
         courseId: plan.courseId,
       },
     });

@@ -247,6 +247,28 @@ export class PaymeService {
       };
     }
 
+    const plan = await this.prismaService.plans.findUnique({
+      where: {
+        id: transaction.planId,
+      },
+    });
+
+    await this.prismaService.myCourses.create({
+      data: {
+        user: {
+          connect: {
+            id: transaction.userId,
+          },
+        },
+        plan: {
+          connect: {
+            id: transaction.planId,
+          },
+        },
+        courseId: plan.courseId,
+      },
+    });
+
     const updatedPayment = await this.prismaService.transactions.update({
       where: {
         transId: performTransactionDto.params.id,
@@ -292,6 +314,12 @@ export class PaymeService {
         data: null,
       };
     }
+
+    await this.prismaService.myCourses.delete({
+      where: {
+        userId: transaction.userId,
+      },
+    });
 
     const updatedTransaction = await this.prismaService.transactions.update({
       where: {
