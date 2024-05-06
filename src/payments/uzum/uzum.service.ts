@@ -254,13 +254,19 @@ export class UzumService {
       },
     });
 
-    await this.prismaService.myCourses.update({
-      where: {
-        userId: transaction.userId,
-      },
+    await this.prismaService.myCourses.create({
       data: {
+        user: {
+          connect: {
+            id: transaction.userId,
+          },
+        },
+        plan: {
+          connect: {
+            id: transaction.planId,
+          },
+        },
         courseId: plan.courseId,
-        planId: transaction.planId,
       },
     });
 
