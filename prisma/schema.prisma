@@ -92,9 +92,9 @@ model Plans {
   updatedAt DateTime @updatedAt
 
   available_period Int // in month
-  includes         String
+  includes         String?
   price            Float
-  courseId         String @db.ObjectId
+  courseId         String  @db.ObjectId
 
   Transactions Transactions[]
   coursesId    String?        @db.ObjectId
@@ -127,7 +127,8 @@ model Articles {
   textRu      String
   imageWeb    String
   imageMobile String
-  isPublished Boolean
+  link        String
+  isPublished Boolean @default(false)
 }
 
 model Banners {

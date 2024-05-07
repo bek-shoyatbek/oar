@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Post,
   Query,
@@ -67,8 +68,16 @@ export class BannersController {
     return await this.bannersService.remove(id);
   }
 
-  @Get('findAll')
-  async findAll(@Query('isPublished') isPublished: boolean) {
+  @Get('all')
+  async findAll(
+    @Query('isPublished', new ParseBoolPipe({ optional: true }))
+    isPublished: boolean,
+  ) {
     return await this.bannersService.findAll(isPublished);
+  }
+
+  @Get('single/:id')
+  async findOne(@Param('id') id: string) {
+    return await this.bannersService.findOne(id);
   }
 }

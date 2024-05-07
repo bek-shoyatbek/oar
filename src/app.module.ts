@@ -22,6 +22,7 @@ import { ArticlesModule } from './articles/articles.module';
 import { PaymentsModule } from './payments/payments.module';
 import { BannersModule } from './banners/banners.module';
 import { CommentsModule } from './comments/comments.module';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { CommentsModule } from './comments/comments.module';
     PaymentsModule,
     BannersModule,
     CommentsModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [AppService, GeneratorService, HashingService],

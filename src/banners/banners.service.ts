@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ParseBoolPipe } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
@@ -25,6 +25,10 @@ export class BannersService {
   }
 
   async update(id: string, updateBannerDto: Prisma.BannersUpdateInput) {
+    const published = updateBannerDto.isPublished as string;
+    if (published) {
+      updateBannerDto.isPublished = published === 'true' ? true : false;
+    }
     return await this.prismaService.banners.update({
       where: { id },
       data: updateBannerDto,

@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   Patch,
   Post,
   Query,
@@ -63,7 +64,10 @@ export class ArticlesController {
   }
 
   @Get('all')
-  async findAll(@Query('isPublished') isPublished: boolean) {
+  async findAll(
+    @Query('isPublished', new ParseBoolPipe({ optional: true }))
+    isPublished: boolean,
+  ) {
     return await this.articlesService.findAll(isPublished);
   }
 

@@ -24,6 +24,11 @@ export class ArticlesService {
       throw new BadRequestException('Article not found');
     }
 
+    const published = updateArticleDto.isPublished as string;
+    if (published) {
+      updateArticleDto.isPublished = published === 'true' ? true : false;
+    }
+
     return await this.prismaService.articles.update({
       where: { id },
       data: updateArticleDto,
