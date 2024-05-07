@@ -254,25 +254,17 @@ export class PaymeService {
       };
     }
 
-    if (transaction.status !== 'PENDING') {
-      if (transaction.status !== 'PAID') {
-        return {
-          error: {
-            code: ErrorStatusCodes.OperationCannotBePerformed,
-            message: {
-              uz: 'Transaksiyani amal qilishga ruxsat berilmadi',
-              en: 'Transaction cannot be performed',
-              ru: 'Транзакция не может быть выполнена',
-            },
-            data: null,
-          },
-        };
-      }
-
+    if (transaction.status === 'PAID') {
       return {
-        perform_time: new Date(transaction.updatedAt).getTime(),
-        transaction: transaction.id,
-        state: TransactionState.Paid,
+        error: {
+          code: ErrorStatusCodes.TransactionNotAllowed,
+          message: {
+            uz: 'Transaksiya allaqachon bajarildi',
+            en: 'Transaction already completed',
+            ru: 'Транзакция уже завершена',
+          },
+          data: null,
+        },
       };
     }
 
