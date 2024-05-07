@@ -200,19 +200,20 @@ export class PaymeService {
       };
     }
 
-    if (existingTransaction?.status == 'PENDING') {
+    if(existingTransaction?.status == 'CANCELED') {
       return {
         error: {
           code: ErrorStatusCodes.TransactionNotAllowed,
           message: {
-            uz: 'Buyurtma allaqachon bajarilmoqda',
-            en: 'Order is in progress',
-            ru: 'Заказ в процессе',
+            uz: 'Buyurtma allaqachon bajarildi',
+            en: 'Order already completed',
+            ru: 'Заказ уже завершен',
           },
           data: null,
         },
       };
     }
+
 
     const newTransaction = await this.prismaService.transactions.create({
       data: {
