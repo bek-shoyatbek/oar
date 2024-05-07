@@ -10,6 +10,7 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { ErrorStatusCodes } from './constants/error-status-codes';
 import { TransactionState } from './constants/transaction-state';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
+import { log } from 'console';
 
 @Injectable()
 export class PaymeService {
@@ -143,7 +144,11 @@ export class PaymeService {
         },
       };
     }
-
+    log('plan', plan);
+    log(
+      'createTransactionDto.params.amount',
+      createTransactionDto.params.amount,
+    );
     if (plan.price === createTransactionDto.params.amount) {
       return {
         error: {
