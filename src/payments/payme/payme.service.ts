@@ -186,33 +186,18 @@ export class PaymeService {
       },
     );
 
-    if (existingTransaction) {
-      if (existingTransaction.status == 'PAID') {
-        return {
-          error: {
-            code: ErrorStatusCodes.OrderCompleted,
-            message: {
-              uz: 'Buyurtma allaqachon bajarildi',
-              en: 'Order already completed',
-              ru: 'Заказ уже завершен',
-            },
-            data: null,
+    if (existingTransaction?.status == 'PAID') {
+      return {
+        error: {
+          code: ErrorStatusCodes.OrderCompleted,
+          message: {
+            uz: 'Buyurtma allaqachon bajarildi',
+            en: 'Order already completed',
+            ru: 'Заказ уже завершен',
           },
-        };
-      }
-      if (existingTransaction.status === 'PENDING') {
-        return {
-          error: {
-            code: ErrorStatusCodes.OperationCannotBePerformed,
-            message: {
-              uz: 'Bu operatsiya bajarilmadi',
-              en: 'Operation cannot be performed',
-              ru: 'Операция не может быть выполнена',
-            },
-            data: null,
-          },
-        };
-      }
+          data: null,
+        },
+      };
     }
 
     const newTransaction = await this.prismaService.transactions.create({
@@ -230,7 +215,6 @@ export class PaymeService {
         },
         provider: 'payme',
         amount: createTransactionDto.params.amount,
-        status: 'PENDING',
       },
     });
 
