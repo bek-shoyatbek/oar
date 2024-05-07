@@ -426,7 +426,7 @@ export class PaymeService {
     if (!transaction) {
       return {
         error: {
-          code: ErrorStatusCodes.TransactionNotFound,
+          code: ErrorStatusCodes.TransactionNotAllowed,
           message: {
             uz: 'Transaksiya topilmadi',
             en: 'Transaction not found',
