@@ -110,7 +110,41 @@ export class PaymeService {
       },
     });
 
-    if (transaction.amount === createTransactionDto.params.amount) {
+    if (transaction) {
+      return {
+        error: {
+          code: ErrorStatusCodes.TransactionNotAllowed,
+          message: {
+            uz: 'Transaksiya band qilingan',
+            en: 'Transaction already created',
+            ru: 'Транзакция уже создана',
+          },
+          data: null,
+        },
+      };
+    }
+
+    const plan = await this.prismaService.plans.findUnique({
+      where: {
+        id: createTransactionDto.params.account.planId,
+      },
+    });
+
+    if (!plan) {
+      return {
+        error: {
+          code: ErrorStatusCodes.PayerAccountNotFound,
+          message: {
+            uz: 'mahsulot topilmadi',
+            en: 'Order not found',
+            ru: 'Товар не найден',
+          },
+          data: null,
+        },
+      };
+    }
+
+    if (plan.price === createTransactionDto.params.amount) {
       return {
         error: {
           code: ErrorStatusCodes.InvalidAmount,
@@ -120,55 +154,6 @@ export class PaymeService {
             ru: 'Сумма транзакции неверна',
           },
           data: null,
-        },
-      };
-    }
-
-    if (transaction) {
-      if (transaction.status !== 'PENDING')
-        return {
-          error: {
-            code: ErrorStatusCodes.OperationCannotBePerformed,
-            message: {
-              uz: 'Transaksiya bekor qilindi',
-              en: 'Transaction canceled',
-              ru: 'Транзакция отменена',
-            },
-            data: null,
-          },
-        };
-      const currentTime = Date.now();
-
-      const expirationTime =
-        (currentTime - new Date(transaction.createdAt).getTime()) / 60000 < 12;
-
-      if (!expirationTime) {
-        await this.prismaService.transactions.update({
-          where: {
-            transId: createTransactionDto.params.id,
-          },
-          data: {
-            status: 'CANCELED',
-          },
-        });
-        return {
-          error: {
-            code: ErrorStatusCodes.OperationCannotBePerformed,
-            message: {
-              uz: 'Transaksiya bekor qilindi',
-              en: 'Transaction canceled',
-              ru: 'Транзакция отменена',
-            },
-            data: null,
-          },
-        };
-      }
-
-      return {
-        result: {
-          current_time: currentTime,
-          transaction: transaction.id,
-          state: TransactionState.Pending,
         },
       };
     }
