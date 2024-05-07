@@ -149,7 +149,7 @@ export class PaymeService {
       'createTransactionDto.params.amount',
       createTransactionDto.params.amount,
     );
-    if (plan.price === createTransactionDto.params.amount) {
+    if (plan.price !== createTransactionDto.params.amount) {
       return {
         error: {
           code: ErrorStatusCodes.InvalidAmount,
