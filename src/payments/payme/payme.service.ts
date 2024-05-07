@@ -56,20 +56,28 @@ export class PaymeService {
   ) {
     const planId = checkPerformTransactionDto.params?.account?.planId;
 
+    const userId = checkPerformTransactionDto.params?.account?.user_id;
+
     const plan = await this.prismaService.plans.findUnique({
       where: {
         id: planId,
       },
     });
 
-    if (!plan) {
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!plan || !user) {
       return {
         error: {
-          code: ErrorStatusCodes.PayerAccountNotFound,
+          code: ErrorStatusCodes.TransactionNotAllowed,
           message: {
-            uz: 'mahsulot topilmadi',
-            en: 'Order not found',
-            ru: 'Товар не найден',
+            uz: 'Sizda mahsulot/foydalanuvchi topilmadi',
+            en: 'Product/user not found',
+            ru: 'Товар/пользователь не найден',
           },
           data: null,
         },
@@ -105,6 +113,36 @@ export class PaymeService {
    * @param {CreateTransactionDto} createTransactionDto
    */
   async createTransaction(createTransactionDto: CreateTransactionDto) {
+    const planId = createTransactionDto.params?.account?.planId;
+
+    const userId = createTransactionDto.params?.account?.user_id;
+
+    const plan = await this.prismaService.plans.findUnique({
+      where: {
+        id: planId,
+      },
+    });
+
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!plan || !user) {
+      return {
+        error: {
+          code: ErrorStatusCodes.TransactionNotAllowed,
+          message: {
+            uz: 'Sizda mahsulot/foydalanuvchi topilmadi',
+            en: 'Product/user not found',
+            ru: 'Товар/пользователь не найден',
+          },
+          data: null,
+        },
+      };
+    }
+
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: createTransactionDto.params.id,
@@ -125,30 +163,6 @@ export class PaymeService {
       };
     }
 
-    const plan = await this.prismaService.plans.findUnique({
-      where: {
-        id: createTransactionDto.params.account.planId,
-      },
-    });
-
-    if (!plan) {
-      return {
-        error: {
-          code: ErrorStatusCodes.PayerAccountNotFound,
-          message: {
-            uz: 'mahsulot topilmadi',
-            en: 'Order not found',
-            ru: 'Товар не найден',
-          },
-          data: null,
-        },
-      };
-    }
-    log('plan', plan);
-    log(
-      'createTransactionDto.params.amount',
-      createTransactionDto.params.amount,
-    );
     if (plan.price !== createTransactionDto.params.amount) {
       return {
         error: {

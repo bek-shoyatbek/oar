@@ -6,6 +6,7 @@ export class CheckPerformTransactionDto {
     amount: number;
     account: {
       planId: string;
+      user_id: string;
     };
   };
 }
