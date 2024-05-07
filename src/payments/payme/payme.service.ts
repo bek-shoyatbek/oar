@@ -104,13 +104,25 @@ export class PaymeService {
    * @param {CreateTransactionDto} createTransactionDto
    */
   async createTransaction(createTransactionDto: CreateTransactionDto) {
-    const preciseAmount = Math.floor(createTransactionDto.params.amount / 100);
-
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: createTransactionDto.params.id,
       },
     });
+
+    if (transaction.amount === createTransactionDto.params.amount) {
+      return {
+        error: {
+          code: ErrorStatusCodes.InvalidAmount,
+          message: {
+            uz: 'Transaksiya miqdori hato',
+            en: 'Transaction amount is wrong',
+            ru: 'Сумма транзакции неверна',
+          },
+          data: null,
+        },
+      };
+    }
 
     if (transaction) {
       if (transaction.status !== 'PENDING')
@@ -213,7 +225,7 @@ export class PaymeService {
           },
         },
         provider: 'payme',
-        amount: preciseAmount,
+        amount: createTransactionDto.params.amount,
         status: 'PENDING',
       },
     });
