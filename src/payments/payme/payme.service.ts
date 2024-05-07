@@ -189,11 +189,25 @@ export class PaymeService {
     if (existingTransaction?.status == 'PAID') {
       return {
         error: {
-          code: ErrorStatusCodes.OrderCompleted,
+          code: ErrorStatusCodes.TransactionNotAllowed,
           message: {
             uz: 'Buyurtma allaqachon bajarildi',
             en: 'Order already completed',
             ru: 'Заказ уже завершен',
+          },
+          data: null,
+        },
+      };
+    }
+
+    if (existingTransaction?.status == 'PENDING') {
+      return {
+        error: {
+          code: ErrorStatusCodes.TransactionNotAllowed,
+          message: {
+            uz: 'Buyurtma allaqachon bajarilmoqda',
+            en: 'Order is in progress',
+            ru: 'Заказ в процессе',
           },
           data: null,
         },
@@ -405,9 +419,23 @@ export class PaymeService {
   async checkTransaction(checkTransactionDto: CheckTransactionDto) {
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
-        id: checkTransactionDto.params.id,
+        transId: checkTransactionDto.params.id,
       },
     });
+
+    if (!transaction) {
+      return {
+        error: {
+          code: ErrorStatusCodes.TransactionNotFound,
+          message: {
+            uz: 'Transaksiya topilmadi',
+            en: 'Transaction not found',
+            ru: 'Транзакция не найдена',
+          },
+          data: null,
+        },
+      };
+    }
 
     return {
       result: {
