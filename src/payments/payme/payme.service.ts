@@ -219,9 +219,11 @@ export class PaymeService {
     });
 
     return {
-      transaction: newTransaction.id,
-      state: TransactionState.Pending,
-      create_time: new Date(newTransaction.createdAt).getTime(),
+      result: {
+        transaction: newTransaction.id,
+        state: TransactionState.Pending,
+        create_time: new Date(newTransaction.createdAt).getTime(),
+      },
     };
   }
 
@@ -389,9 +391,11 @@ export class PaymeService {
     });
 
     return {
-      cancel_time: new Date(updatedTransaction.updatedAt).getTime(),
-      transaction: updatedTransaction.id,
-      status: -2,
+      result: {
+        cancel_time: new Date(updatedTransaction.updatedAt).getTime(),
+        transaction: updatedTransaction.id,
+        status: -2,
+      },
     };
   }
 
@@ -406,12 +410,14 @@ export class PaymeService {
     });
 
     return {
-      create_time: new Date(transaction.createdAt).getTime(),
-      perform_time: new Date(transaction.updatedAt).getTime(),
-      cancel_time: 0,
-      transaction: transaction.id,
-      state: 2,
-      reason: null,
+      result: {
+        create_time: new Date(transaction.createdAt).getTime(),
+        perform_time: new Date(transaction.updatedAt).getTime(),
+        cancel_time: 0,
+        transaction: transaction.id,
+        state: 2,
+        reason: null,
+      },
     };
   }
 
