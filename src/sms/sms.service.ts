@@ -11,6 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { GeneratorService } from 'src/utils/generator/generator.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import { debug, info } from 'node:console';
 
 @Injectable()
 export class SmsService implements Sms {
@@ -40,6 +41,9 @@ export class SmsService implements Sms {
       };
 
       const utime = +uTime.toString().split('.')[0];
+
+      info('utime', utime);
+      info('utime type', typeof utime);
 
       const accessToken = this.md5(
         `TransmitSMS ${this.username} ${this.smsSecret} ${utime}`,

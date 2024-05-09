@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterWithEmailDto } from './dto/register-with-email.dto';
 import { RegisterWithPhoneDto } from './dto/register-with-phone.dto';
 import { ConfirmCodeDto } from './dto/confirm-code.dto';
+import { ResetUserPasswordDto } from './dto/reset-user-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -39,15 +40,27 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Post('email/send-reset-code')
+  async sendResetCodeByEmail(@Body('email') email: string) {
+    return await this.authService.sendResetCodeByEmail(email);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('phone/send-reset-code')
+  async sendResetCodeByPhone(@Body('phone') phone: string) {
+    return await this.authService.sendResetCodeByPhone(phone);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('reset-user-password')
+  async resetUserPassword(@Body() resetUserPasswordDto: ResetUserPasswordDto) {
+    return await this.authService.resetUserPassword(resetUserPasswordDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Post('refresh-access-token')
   async refreshToken(@Body('accessToken') accessToken: string) {
     return 'refresh access token';
     // return await this.authService.refreshToken(accessToken);
   }
-
-  // @HttpCode(HttpStatus.OK)
-  // @Post('resend-code')
-  // async resendCode(@Body() confirmCodeDto: ConfirmCodeDto) {
-  //   return 'resend code';
-  // }
 }

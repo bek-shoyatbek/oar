@@ -19,6 +19,7 @@ import {
 import { STORAGE } from 'src/constants/storage';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { info } from 'console';
 
 @Controller('lessons')
 export class LessonsController {
@@ -32,7 +33,7 @@ export class LessonsController {
       [
         { name: 'video', maxCount: 1 },
         {
-          name: 'attachedFile',
+          name: 'attachedFiles',
           maxCount: 5,
         },
       ],
@@ -79,7 +80,7 @@ export class LessonsController {
       [
         { name: 'video', maxCount: 1 },
         {
-          name: 'attachedFile',
+          name: 'attachedFiles',
           maxCount: 5,
         },
       ],

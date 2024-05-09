@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { SmsService } from 'src/sms/sms.service';
+import { ResetUserPasswordDto } from './dto/reset-user-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -122,8 +123,6 @@ export class AuthService {
       text: message,
     });
 
-    console.log('res', res);
-
     registerWithPhoneDto.password = await this.hashingService.hashPassword(
       registerWithPhoneDto.password,
     );
@@ -225,5 +224,101 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  async sendResetCodeByEmail(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const sessionId = this.generatorService.generateUUID();
+    const code = this.generatorService.generateConfirmationCode();
+    const message = this.generatorService.generateConfirmationMessage(
+      code,
+      'email',
+    );
+
+    const credentials = {
+      email,
+      code,
+    };
+
+    await this.mailService.sendMail({
+      to: email,
+      subject: 'Confirmation code',
+      html: message,
+    });
+
+    await this.cacheManager.set(
+      sessionId,
+      JSON.stringify(credentials),
+      1000 * 60 * 5,
+    ); // 5 min
+
+    return { sessionId };
+  }
+
+  async sendResetCodeByPhone(phone: string) {
+    const user = await this.userService.findOneByPhone(phone);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const sessionId = this.generatorService.generateUUID();
+    const code = this.generatorService.generateConfirmationCode();
+    const message = this.generatorService.generateConfirmationMessage(
+      code,
+      'phone',
+    );
+
+    const credentials = {
+      phone,
+      code,
+    };
+
+    await this.smsService.sendSms({ phone, text: message });
+    await this.cacheManager.set(
+      sessionId,
+      JSON.stringify(credentials),
+      1000 * 60 * 5,
+    ); // 5 min
+
+    return { sessionId };
+  }
+
+  async resetUserPassword(resetUserPasswordDto: ResetUserPasswordDto) {
+    const cachedCredentials = (await this.cacheManager.get(
+      resetUserPasswordDto.sessionId,
+    )) as string;
+
+    if (!cachedCredentials) {
+      throw new BadRequestException('Invalid sessionId or code');
+    }
+
+    const credentials = JSON.parse(cachedCredentials);
+
+    if (credentials.code !== +resetUserPasswordDto.confirmationCode) {
+      throw new BadRequestException('Invalid code');
+    }
+
+    const user = await this.userService.findOneByEmail(credentials.email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    const hashedPassword = await this.hashingService.hashPassword(
+      resetUserPasswordDto.newPassword,
+    );
+
+    await this.userService.update(user.id, {
+      password: hashedPassword,
+    });
+
+    await this.cacheManager.del(resetUserPasswordDto.sessionId);
+
+    return { message: 'Password reset successfully' };
   }
 }
