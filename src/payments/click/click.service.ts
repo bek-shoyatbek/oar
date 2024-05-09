@@ -17,15 +17,13 @@ export class ClickService {
   ) {}
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
-    console.log('reqBody', clickReqBody);
-
     const actionType = +clickReqBody.action;
 
     if (isNaN(actionType)) {
       console.error('Invalid action');
       return {
         error_code: ClickError.ActionNotFound,
-        error_msg: 'Invalid action',
+        error_note: 'Invalid action',
       };
     }
 
@@ -36,15 +34,19 @@ export class ClickService {
     } else {
       return {
         error_code: ClickError.ActionNotFound,
-        error_msg: 'Invalid action',
+        error_note: 'Invalid action',
       };
     }
   }
 
   async prepare(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
+
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
+    const amount = clickReqBody.amount;
+    const transId = clickReqBody.click_trans_id + ''; // ! in db transId is string
+
     const md5Hash = this.hashingService.md5(
       `${clickReqBody.click_trans_id}${clickReqBody.service_id}${secretKey}${planId}${clickReqBody.amount}${clickReqBody.action}${clickReqBody.sign_time}`,
     );
@@ -57,7 +59,7 @@ export class ClickService {
       console.error('Invalid sign_string');
       return {
         error_code: ClickError.SignFailed,
-        error_msg: 'Invalid sign_string',
+        error_note: 'Invalid sign_string',
       };
     }
 
@@ -69,7 +71,36 @@ export class ClickService {
       console.error('Invalid planId or userId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid planId or userId',
+        error_note: 'Invalid planId or userId',
+      };
+    }
+    const isAlreadyPaid = await this.prismaService.transactions.findFirst({
+      where: {
+        userId: userId,
+        planId: planId,
+        status: 'PAID',
+      },
+    });
+
+    if (isAlreadyPaid) {
+      console.error('Already paid');
+      return {
+        error_code: ClickError.AlreadyPaid,
+        error_note: 'Already paid',
+      };
+    }
+
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      console.error('Invalid userId');
+      return {
+        error_code: ClickError.UserNotFound,
+        error_note: 'Invalid userId',
       };
     }
 
@@ -83,31 +114,28 @@ export class ClickService {
       console.error('Invalid planId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid planId',
+        error_note: 'Product not found',
       };
     }
 
-    const isAlreadyPaid = await this.prismaService.transactions.findFirst({
-      where: {
-        userId: userId,
-        planId: planId,
-        status: 'PAID',
-      },
-    });
-
-    if (isAlreadyPaid) {
-      console.error('Already paid');
-      return {
-        error_code: ClickError.AlreadyPaid,
-        error_msg: 'Already paid',
-      };
-    }
-
-    if (clickReqBody.amount < 0 || clickReqBody.amount != plan.price) {
+    if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
       return {
         error_code: ClickError.InvalidAmount,
-        error_msg: 'Invalid amount',
+        error_note: 'Invalid amount',
+      };
+    }
+
+    const transaction = await this.prismaService.transactions.findUnique({
+      where: {
+        transId: transId,
+      },
+    });
+
+    if (transaction && transaction.status == 'CANCELED') {
+      return {
+        error_code: ClickError.TransactionCanceled,
+        error_note: 'Transaction canceled',
       };
     }
 
@@ -125,6 +153,7 @@ export class ClickService {
             id: userId,
           },
         },
+        transId: transId,
         prepareId: time,
         status: 'PENDING',
         provider: 'click',
@@ -134,7 +163,7 @@ export class ClickService {
     });
 
     return {
-      click_trans_id: clickReqBody.click_trans_id,
+      click_trans_id: +transId,
       merchant_trans_id: planId,
       merchant_prepare_id: time,
       error: ClickError.Success,
@@ -145,6 +174,29 @@ export class ClickService {
   async complete(clickReqBody: ClickRequestDto) {
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
+    const transId = clickReqBody.click_trans_id + '';
+    const serviceId = clickReqBody.service_id;
+    const prepareId = clickReqBody.merchant_prepare_id;
+    const amount = clickReqBody.amount;
+    const signTime = clickReqBody.sign_time;
+    const error = clickReqBody.error;
+
+    const secretKey = this.configService.get<string>('CLICK_SECRET');
+    const md5Hash = this.hashingService.md5(
+      `${transId}${serviceId}${secretKey}${planId}${amount}${clickReqBody.action}${signTime}`,
+    );
+    const isValidSignature = this.verifyMd5Hash(
+      clickReqBody.sign_string,
+      md5Hash,
+    );
+
+    if (!isValidSignature) {
+      console.error('Invalid sign_string');
+      return {
+        error_code: ClickError.SignFailed,
+        error_note: 'Invalid sign_string',
+      };
+    }
 
     const isValidPlanId = this.checkObjectId(planId);
 
@@ -154,7 +206,21 @@ export class ClickService {
       console.error('Invalid planId or userId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid planId or userId',
+        error_note: 'Invalid planId or userId',
+      };
+    }
+
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      console.error('Invalid userId');
+      return {
+        error_code: ClickError.UserNotFound,
+        error_note: 'Invalid userId',
       };
     }
 
@@ -168,47 +234,76 @@ export class ClickService {
       console.error('Invalid planId');
       return {
         error_code: ClickError.BadRequest,
-        error_msg: 'Invalid planId',
+        error_note: 'Invalid planId',
       };
     }
 
-    const transaction = await this.prismaService.transactions.findFirst({
+    const isPrepared = await this.prismaService.transactions.findFirst({
       where: {
-        planId,
         prepareId: +clickReqBody.merchant_prepare_id,
-        status: 'PENDING',
       },
     });
 
-    if (!transaction) {
+    if (!isPrepared) {
       console.error('Invalid merchant_prepare_id');
       return {
-        error_code: ClickError.BadRequest,
-        error_msg: 'Invalid merchant_prepare_id',
+        error_code: ClickError.TransactionNotFound,
+        error_note: 'Invalid merchant_prepare_id',
       };
     }
 
-    if (transaction.status == 'PAID') {
+    const isAlreadyPaid = await this.prismaService.transactions.findFirst({
+      where: {
+        planId,
+        prepareId: +clickReqBody.merchant_prepare_id,
+        status: 'PAID',
+      },
+    });
+
+    if (isAlreadyPaid) {
       console.error('Already paid');
       return {
         error_code: ClickError.AlreadyPaid,
-        error_msg: 'Already paid',
+        error_note: 'Already paid',
       };
     }
 
-    if (transaction.status == 'CANCELED') {
-      console.error('Already cancelled');
-      return {
-        error_code: ClickError.TransactionCanceled,
-        error_msg: 'Already cancelled',
-      };
-    }
-
-    if (clickReqBody.amount < 0 || clickReqBody.amount != transaction.amount) {
+    if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
       return {
         error_code: ClickError.InvalidAmount,
-        error_msg: 'Invalid amount',
+        error_note: 'Invalid amount',
+      };
+    }
+
+    const transaction = await this.prismaService.transactions.findUnique({
+      where: {
+        transId,
+      },
+    });
+
+    if (transaction && transaction.status == 'CANCELED') {
+      console.error('Already cancelled');
+      return {
+        error_code: ClickError.TransactionCanceled,
+        error_note: 'Already cancelled',
+      };
+    }
+
+    const time = new Date().getTime();
+
+    if (error > 0) {
+      await this.prismaService.transactions.update({
+        where: {
+          id: transaction.id,
+        },
+        data: {
+          status: 'CANCELED',
+        },
+      });
+      return {
+        error_code: error,
+        error_msg: 'Failed',
       };
     }
 
@@ -238,15 +333,13 @@ export class ClickService {
       },
     });
 
-    const response = {
+    return {
       click_trans_id: +clickReqBody.click_trans_id,
-      merchant_trans_id: clickReqBody.merchant_trans_id,
-      merchant_confirm_id: null,
-      error_code: 0,
+      merchant_trans_id: planId,
+      merchant_confirm_id: time,
+      error_code: ClickError.Success,
       error_msg: 'Success',
     };
-
-    return response;
   }
 
   checkObjectId(id: string) {
