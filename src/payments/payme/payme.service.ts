@@ -150,7 +150,7 @@ export class PaymeService {
 
     if (transaction) {
       return {
-        error: PaymeError.CantDoOperation,
+        error: PaymeError.Pending,
       };
     }
 
