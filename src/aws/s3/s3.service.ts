@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
-
 @Injectable()
 export class S3Service {
   private readonly s3Client: S3Client;
@@ -18,7 +17,8 @@ export class S3Service {
   }
 
   async upload(file: Express.Multer.File) {
-    const fileName = `${Date.now()}-${file.originalname}`;
+    const fileName = this.getUniqueFilename(file.originalname);
+
     const domainName = this.configService.get<string>(
       'AWS_CLOUDFRONT_DOMAIN_NAME',
     );
@@ -33,5 +33,12 @@ export class S3Service {
 
     const fileUrl = `${domainName}/${fileName}`;
     return fileUrl;
+  }
+  private getUniqueFilename(originalName: string) {
+    const ext = originalName.split('.')[originalName.split('.').length - 1];
+
+    const randomString = Date.now().valueOf();
+
+    return `${randomString}.${ext}`;
   }
 }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,23 +6,15 @@ import {
   Param,
   Patch,
   Post,
-  UploadedFile,
-  UseInterceptors,
 } from '@nestjs/common';
 import { ModulesService } from './modules.service';
 import { Prisma } from '@prisma/client';
-import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { STORAGE } from 'src/constants/storage';
+
 import { ValidateObjectIdDto } from 'src/courses/dto/validate-objectId.dto';
-import { S3Service } from 'src/aws/s3/s3.service';
 
 @Controller('modules')
 export class ModulesController {
-  constructor(
-    private readonly modulesService: ModulesService,
-    private readonly s3Service: S3Service,
-  ) {}
+  constructor(private readonly modulesService: ModulesService) {}
   @Post('create/:courseId')
   async create(
     @Param('courseId') courseId: string,

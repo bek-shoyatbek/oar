@@ -66,7 +66,7 @@ model Lessons {
   video         String
   descriptionUz String?
   descriptionRu String?
-  attachedFile  String?
+  attachedFiles  String[] @default([])
   module        Modules  @relation(fields: [moduleId], references: [id])
   moduleId      String   @db.ObjectId
 }
@@ -92,7 +92,8 @@ model Plans {
   updatedAt DateTime @updatedAt
 
   available_period Int // in month
-  includes         String?
+  includeResources Boolean @default(false)
+  includeSupport   Boolean @default(false)
   price            Float
   courseId         String  @db.ObjectId
 

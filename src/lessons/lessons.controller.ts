@@ -8,10 +8,14 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 import { STORAGE } from 'src/constants/storage';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
@@ -23,18 +27,43 @@ export class LessonsController {
     private readonly s3Service: S3Service,
   ) {}
   @Post('create/:moduleId')
-  @UseInterceptors(FileInterceptor('video', { storage: STORAGE }))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'video', maxCount: 1 },
+        {
+          name: 'attachedFile',
+          maxCount: 5,
+        },
+      ],
+      { storage: STORAGE },
+    ),
+  )
   async create(
     @Param('moduleId') moduleId: string,
     @Body() createLessonDto: Prisma.LessonsCreateInput,
-    @UploadedFile() video: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      video: Express.Multer.File[];
+      attachedFiles?: Express.Multer.File[];
+    },
   ) {
+    const video = files.video[0];
+    const attachedFiles = files?.attachedFiles;
+
     if (!video) {
       throw new BadRequestException('video is required');
     }
-    const fileUrl = await this.s3Service.upload(video);
 
-    createLessonDto.video = fileUrl;
+    if (attachedFiles) {
+      const fileURLs = await Promise.all([
+        ...attachedFiles?.map((file) => this.s3Service.upload(file)),
+      ]);
+
+      createLessonDto.attachedFiles = fileURLs;
+    }
+
+    createLessonDto.video = await this.s3Service.upload(video);
 
     return await this.lessonsService.create(moduleId, createLessonDto);
   }
@@ -45,16 +74,40 @@ export class LessonsController {
   }
 
   @Patch('update/:id')
-  @UseInterceptors(FileInterceptor('video', { storage: STORAGE }))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'video', maxCount: 1 },
+        {
+          name: 'attachedFile',
+          maxCount: 5,
+        },
+      ],
+      { storage: STORAGE },
+    ),
+  )
   async update(
     @Body() updateLessonDto: Prisma.LessonsUpdateInput,
     @Param('id') id: string,
-    @UploadedFile() video: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      video?: Express.Multer.File[];
+      attachedFiles?: Express.Multer.File[];
+    },
   ) {
-    if (video) {
-      const fileUrl = await this.s3Service.upload(video);
+    const video = files?.video[0];
+    const attachedFiles = files?.attachedFiles;
 
-      updateLessonDto.video = fileUrl;
+    if (video) {
+      updateLessonDto.video = await this.s3Service.upload(video);
+    }
+
+    if (attachedFiles) {
+      const fileURLs = await Promise.all([
+        ...attachedFiles?.map((file) => this.s3Service.upload(file)),
+      ]);
+
+      updateLessonDto.attachedFiles = fileURLs;
     }
 
     return await this.lessonsService.update(id, updateLessonDto);
