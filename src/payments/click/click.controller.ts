@@ -8,6 +8,7 @@ export class ClickController {
   @Post('shop-api')
   @HttpCode(HttpStatus.OK)
   async handleMerchantTransactions(@Body() clickReqBody: ClickRequestDto) {
+    console.log('click:reqBody', clickReqBody);
     const result =
       await this.clickService.handleMerchantTransactions(clickReqBody);
     console.log('response', result);
