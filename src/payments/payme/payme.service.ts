@@ -11,6 +11,7 @@ import { ErrorStatusCodes } from './constants/error-status-codes';
 import { TransactionState } from './constants/transaction-state';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { log } from 'console';
+import { PaymeError } from './constants/payme-error';
 
 @Injectable()
 export class PaymeService {
@@ -129,17 +130,15 @@ export class PaymeService {
       },
     });
 
-    if (!plan || !user) {
+    if (!user) {
       return {
-        error: {
-          code: ErrorStatusCodes.TransactionNotAllowed,
-          message: {
-            uz: 'Sizda mahsulot/foydalanuvchi topilmadi',
-            en: 'Product/user not found',
-            ru: 'Товар/пользователь не найден',
-          },
-          data: null,
-        },
+        error: PaymeError.UserNotFound,
+      };
+    }
+
+    if (!plan) {
+      return {
+        error: PaymeError.ProductNotFound,
       };
     }
 
@@ -151,29 +150,13 @@ export class PaymeService {
 
     if (transaction) {
       return {
-        error: {
-          code: ErrorStatusCodes.TransactionNotAllowed,
-          message: {
-            uz: 'Transaksiya band qilingan',
-            en: 'Transaction already created',
-            ru: 'Транзакция уже создана',
-          },
-          data: null,
-        },
+        error: PaymeError.CantDoOperation,
       };
     }
 
     if (plan.price !== createTransactionDto.params.amount) {
       return {
-        error: {
-          code: ErrorStatusCodes.InvalidAmount,
-          message: {
-            uz: 'Transaksiya miqdori hato',
-            en: 'Transaction amount is wrong',
-            ru: 'Сумма транзакции неверна',
-          },
-          data: null,
-        },
+        error: PaymeError.InvalidAmount,
       };
     }
 
@@ -188,32 +171,15 @@ export class PaymeService {
 
     if (existingTransaction?.status == 'PAID') {
       return {
-        error: {
-          code: ErrorStatusCodes.TransactionNotAllowed,
-          message: {
-            uz: 'Buyurtma allaqachon bajarildi',
-            en: 'Order already completed',
-            ru: 'Заказ уже завершен',
-          },
-          data: null,
-        },
+        error: PaymeError.AlreadyDone,
       };
     }
 
-    if(existingTransaction?.status == 'CANCELED') {
+    if (existingTransaction?.status == 'CANCELED') {
       return {
-        error: {
-          code: ErrorStatusCodes.TransactionNotAllowed,
-          message: {
-            uz: 'Buyurtma allaqachon bajarildi',
-            en: 'Order already completed',
-            ru: 'Заказ уже завершен',
-          },
-          data: null,
-        },
+        error: PaymeError.CantDoOperation,
       };
     }
-
 
     const newTransaction = await this.prismaService.transactions.create({
       data: {
