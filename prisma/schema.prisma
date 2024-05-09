@@ -27,6 +27,15 @@ model Users {
   MyCourse     MyCourses[]
 }
 
+model Admin {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  username String
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Courses {
   id            String       @id @default(auto()) @map("_id") @db.ObjectId
   createdAt     DateTime     @default(now())
@@ -66,7 +75,7 @@ model Lessons {
   video         String
   descriptionUz String?
   descriptionRu String?
-  attachedFiles  String[] @default([])
+  attachedFiles String[] @default([])
   module        Modules  @relation(fields: [moduleId], references: [id])
   moduleId      String   @db.ObjectId
 }

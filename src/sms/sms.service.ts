@@ -42,9 +42,6 @@ export class SmsService implements Sms {
 
       const utime = +uTime.toString().split('.')[0];
 
-      info('utime', utime);
-      info('utime type', typeof utime);
-
       const accessToken = this.md5(
         `TransmitSMS ${this.username} ${this.smsSecret} ${utime}`,
       );
@@ -57,7 +54,7 @@ export class SmsService implements Sms {
         this.smsURL + '/TransmitSMS',
         {
           message,
-          utime: uTime,
+          utime: utime,
           service: {
             service: 1, // 1 - код доступа ОТП (без отчета о доставке)
           },
