@@ -337,8 +337,16 @@ export class ClickService {
 
     await this.prismaService.myCourses.create({
       data: {
-        userId: transaction.userId,
-        planId: transaction.planId,
+        user: {
+          connect: {
+            id: transaction.userId,
+          },
+        },
+        plan: {
+          connect: {
+            id: transaction.planId,
+          },
+        },
         courseId: plan.courseId,
       },
     });

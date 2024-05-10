@@ -107,7 +107,6 @@ model Plans {
   courseId         String  @db.ObjectId
 
   Transactions Transactions[]
-  coursesId    String?        @db.ObjectId
   MyCourses    MyCourses[]
 }
 
