@@ -9,12 +9,14 @@ import {
   Post,
   Query,
   UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { CommentsService } from './comments.service';
-import { Prisma } from '@prisma/client';
-import { S3Service } from 'src/aws/s3/s3.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+  UseFilters,
+  UseInterceptors
+} from "@nestjs/common";
+import { CommentsService } from "./comments.service";
+import { Prisma } from "@prisma/client";
+import { S3Service } from "src/aws/s3/s3.service";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { PrismaClientExceptionFilter } from "../exception-filters/prisma/prisma.filter";
 
 @Controller('comments')
 export class CommentsController {
@@ -25,19 +27,20 @@ export class CommentsController {
 
   @Post('create')
   @UseInterceptors(FileInterceptor('userAvatar'))
+  @UseFilters(PrismaClientExceptionFilter)
   async create(
     @Body() createCommentDto: Prisma.CommentsCreateInput,
     @UploadedFile() image: Express.Multer.File,
   ) {
     if (image) {
-      const fileUrl = await this.s3Service.upload(image);
-      createCommentDto.userAvatar = fileUrl;
+      createCommentDto.userAvatar = await this.s3Service.upload(image);
     }
     return await this.commentsService.create(createCommentDto);
   }
 
   @Patch('update/:id')
   @UseInterceptors(FileInterceptor('userAvatar'))
+  @UseFilters(PrismaClientExceptionFilter)
   async update(
     @Param('id') id: string,
     @Body() updateCommentDto: Prisma.CommentsUpdateInput,
@@ -51,11 +54,13 @@ export class CommentsController {
   }
 
   @Delete('delete/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
     return await this.commentsService.remove(id);
   }
 
   @Get('all')
+  @UseFilters(PrismaClientExceptionFilter)
   async findAll(
     @Query('isPublished', new ParseBoolPipe({ optional: true }))
     isPublished: boolean,

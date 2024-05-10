@@ -10,12 +10,14 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { BannersService } from './banners.service';
 import { Prisma } from '@prisma/client';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
 
 @Controller('banners')
 export class BannersController {
@@ -26,6 +28,7 @@ export class BannersController {
 
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))
+  @UseFilters(PrismaClientExceptionFilter)
   async create(
     @Body() createBannerDto: Prisma.BannersCreateInput,
     @UploadedFiles() images: Express.Multer.File[],
@@ -47,6 +50,7 @@ export class BannersController {
 
   @Patch('update/:id')
   @UseInterceptors(FilesInterceptor('images'))
+  @UseFilters(PrismaClientExceptionFilter)
   async update(
     @UploadedFiles() images: Express.Multer.File[],
     @Param('id') id: string,
@@ -64,11 +68,13 @@ export class BannersController {
   }
 
   @Delete('delete/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
     return await this.bannersService.remove(id);
   }
 
   @Get('all')
+  @UseFilters(PrismaClientExceptionFilter)
   async findAll(
     @Query('isPublished', new ParseBoolPipe({ optional: true }))
     isPublished: boolean,
@@ -77,6 +83,7 @@ export class BannersController {
   }
 
   @Get('single/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.bannersService.findOne(id);
   }

@@ -9,8 +9,8 @@ import {
   Request,
   BadRequestException,
   UseInterceptors,
-  UploadedFile,
-} from '@nestjs/common';
+  UploadedFile, UseFilters
+} from "@nestjs/common";
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Prisma } from '@prisma/client';
@@ -18,6 +18,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from '../constants/storage';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { PrismaClientExceptionFilter } from "../exception-filters/prisma/prisma.filter";
 
 @Controller('users')
 export class UsersController {
@@ -28,6 +29,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get('profile')
+  @UseFilters(PrismaClientExceptionFilter)
   async getProfile(@Request() req) {
     const user = await this.usersService.findOneById(req?.user?.userId);
 
@@ -41,6 +43,7 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Patch('profile')
   @UseInterceptors(FileInterceptor('avatar', { storage: STORAGE }))
+  @UseFilters(PrismaClientExceptionFilter)
   async update(
     @Request() req,
     @Body() updateUserDto: Prisma.UsersUpdateInput,
@@ -58,6 +61,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @UseFilters(PrismaClientExceptionFilter)
   async remove(@Param('id') id: string) {
     return await this.usersService.remove(id);
   }

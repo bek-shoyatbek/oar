@@ -7,19 +7,16 @@ import {
   Param,
   Patch,
   Post,
-  UploadedFile,
   UploadedFiles,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
-import {
-  FileFieldsInterceptor,
-  FileInterceptor,
-} from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from 'src/constants/storage';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
-import { info } from 'console';
+import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
 
 @Controller('lessons')
 export class LessonsController {
@@ -40,6 +37,7 @@ export class LessonsController {
       { storage: STORAGE },
     ),
   )
+  @UseFilters(PrismaClientExceptionFilter)
   async create(
     @Param('moduleId') moduleId: string,
     @Body() createLessonDto: Prisma.LessonsCreateInput,
@@ -57,11 +55,9 @@ export class LessonsController {
     }
 
     if (attachedFiles) {
-      const fileURLs = await Promise.all([
+      createLessonDto.attachedFiles = await Promise.all([
         ...attachedFiles?.map((file) => this.s3Service.upload(file)),
       ]);
-
-      createLessonDto.attachedFiles = fileURLs;
     }
 
     createLessonDto.video = await this.s3Service.upload(video);
@@ -70,6 +66,7 @@ export class LessonsController {
   }
 
   @Get('single/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.lessonsService.findOne(id);
   }
@@ -87,6 +84,7 @@ export class LessonsController {
       { storage: STORAGE },
     ),
   )
+  @UseFilters(PrismaClientExceptionFilter)
   async update(
     @Body() updateLessonDto: Prisma.LessonsUpdateInput,
     @Param('id') id: string,
@@ -104,17 +102,16 @@ export class LessonsController {
     }
 
     if (attachedFiles) {
-      const fileURLs = await Promise.all([
+      updateLessonDto.attachedFiles = await Promise.all([
         ...attachedFiles?.map((file) => this.s3Service.upload(file)),
       ]);
-
-      updateLessonDto.attachedFiles = fileURLs;
     }
 
     return await this.lessonsService.update(id, updateLessonDto);
   }
 
   @Delete('delete/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
     return await this.lessonsService.remove(id);
   }

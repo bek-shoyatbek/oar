@@ -10,12 +10,14 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { PrismaClientExceptionFilter } from 'src/exception-filters/prisma/prisma.filter';
 
 @Controller('articles')
 export class ArticlesController {
@@ -25,6 +27,7 @@ export class ArticlesController {
   ) {}
   @Post('create')
   @UseInterceptors(FilesInterceptor('images'))
+  @UseFilters(PrismaClientExceptionFilter)
   async create(
     @UploadedFiles() images: Express.Multer.File[],
     @Body() createArticleDto: Prisma.ArticlesCreateInput,
@@ -45,6 +48,7 @@ export class ArticlesController {
   }
 
   @Patch('update/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   @UseInterceptors(FilesInterceptor('images'))
   async update(
     @Body() updateArticleDto: Prisma.ArticlesUpdateInput,
@@ -64,6 +68,7 @@ export class ArticlesController {
   }
 
   @Get('all')
+  @UseFilters(PrismaClientExceptionFilter)
   async findAll(
     @Query('isPublished', new ParseBoolPipe({ optional: true }))
     isPublished: boolean,
@@ -72,11 +77,13 @@ export class ArticlesController {
   }
 
   @Get('single/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.articlesService.findOne(id);
   }
 
   @Delete('remove/:id')
+  @UseFilters(PrismaClientExceptionFilter)
   async remove(@Param('id') id: string) {
     return await this.articlesService.remove(id);
   }
