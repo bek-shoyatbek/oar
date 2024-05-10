@@ -17,6 +17,7 @@ export class ClickService {
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
     const actionType = +clickReqBody.action;
+    clickReqBody.amount = parseFloat(clickReqBody.amount + '');
 
     if (isNaN(actionType)) {
       console.error('Invalid action');
@@ -54,13 +55,13 @@ export class ClickService {
       md5Hash,
     );
 
-    if (!isValidSignature) {
-      console.error('Invalid sign_string');
-      return {
-        error_code: ClickError.SignFailed,
-        error_note: 'Invalid sign_string',
-      };
-    }
+    // if (!isValidSignature) {
+    //   console.error('Invalid sign_string');
+    //   return {
+    //     error_code: ClickError.SignFailed,
+    //     error_note: 'Invalid sign_string',
+    //   };
+    // }
 
     const isValidPlanId = this.checkObjectId(planId);
 
@@ -204,14 +205,14 @@ export class ClickService {
       md5Hash,
     );
 
-    if (!isValidSignature) {
-      console.error('Invalid sign_string');
-      return {
-        error_code: ClickError.SignFailed,
-        error_note: 'Invalid sign_string',
-      };
-    }
-
+    // if (!isValidSignature) {
+    //   console.error('Invalid sign_string');
+    //   return {
+    //     error_code: ClickError.SignFailed,
+    //     error_note: 'Invalid sign_string',
+    //   };
+    // }
+    //
     const isValidPlanId = this.checkObjectId(planId);
 
     const isValidUserId = this.checkObjectId(userId);

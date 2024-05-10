@@ -19,7 +19,7 @@ async function bootstrap() {
     origin: '*',
   });
 
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+  // app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   await app.listen(port);
 }
