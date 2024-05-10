@@ -47,8 +47,7 @@ export class CommentsController {
     @UploadedFile() image: Express.Multer.File,
   ) {
     if (image) {
-      const fileUrl = await this.s3Service.upload(image);
-      updateCommentDto.userAvatar = fileUrl;
+      updateCommentDto.userAvatar = await this.s3Service.upload(image);
     }
     return await this.commentsService.update(id, updateCommentDto);
   }

@@ -8,7 +8,7 @@ export class ArticlesService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createArticleDto: Prisma.ArticlesCreateInput) {
-    return await this.prismaService.articles.create({ data: createArticleDto });
+    return this.prismaService.articles.create({ data: createArticleDto });
   }
 
   async update(id: string, updateArticleDto: Prisma.ArticlesUpdateInput) {

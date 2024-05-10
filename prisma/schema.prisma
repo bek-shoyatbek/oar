@@ -128,16 +128,17 @@ model Articles {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  titleUz     String
-  titleRu     String
-  headlineUz  String
-  headlineRu  String
-  textUz      String
-  textRu      String
-  imageWeb    String
-  imageMobile String
-  link        String
-  isPublished Boolean @default(false)
+  titleUz      String
+  titleRu      String
+  headlineUz   String
+  headlineRu   String
+  textUz       String
+  textRu       String
+  articleImage String
+  imageWeb     String
+  imageMobile  String
+  link         String
+  isPublished  Boolean @default(false)
 }
 
 model Banners {

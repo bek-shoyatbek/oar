@@ -11,80 +11,132 @@ import {
   Query,
   UploadedFiles,
   UseFilters,
-  UseInterceptors,
-} from '@nestjs/common';
-import { ArticlesService } from './articles.service';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { Prisma } from '@prisma/client';
-import { S3Service } from 'src/aws/s3/s3.service';
-import { PrismaClientExceptionFilter } from 'src/exception-filters/prisma/prisma.filter';
+  UseInterceptors
+} from "@nestjs/common";
+import { ArticlesService } from "./articles.service";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { Prisma } from "@prisma/client";
+import { S3Service } from "src/aws/s3/s3.service";
+import { PrismaClientExceptionFilter } from "src/exception-filters/prisma/prisma.filter";
+import { STORAGE } from "../constants/storage";
 
-@Controller('articles')
+@Controller("articles")
 export class ArticlesController {
   constructor(
     private readonly articlesService: ArticlesService,
-    private readonly s3Service: S3Service,
-  ) {}
-  @Post('create')
-  @UseInterceptors(FilesInterceptor('images'))
+    private readonly s3Service: S3Service
+  ) {
+  }
+
+  @Post("create")
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: "articleImage", maxCount: 1 },
+      {
+        name: "bannerImageWeb",
+        maxCount: 1
+      }, {
+      name: "bannerImageMobile",
+      maxCount: 1
+    }
+    ],
+    { storage: STORAGE }
+  ))
   @UseFilters(PrismaClientExceptionFilter)
   async create(
-    @UploadedFiles() images: Express.Multer.File[],
-    @Body() createArticleDto: Prisma.ArticlesCreateInput,
+    @UploadedFiles() files: {
+      articleImage: Express.Multer.File[];
+      bannerImageWeb: Express.Multer.File[];
+      bannerImageMobile: Express.Multer.File[];
+    },
+    @Body() createArticleDto: Prisma.ArticlesCreateInput
   ) {
-    if (!images || images.length < 2) {
-      throw new BadRequestException('images are required');
+
+    const articleImage = files.articleImage[0];
+    const bannerImageWeb = files.bannerImageWeb[0];
+    const bannerImageMobile = files.bannerImageMobile[0];
+
+    if (!articleImage || !bannerImageMobile || !bannerImageWeb) {
+      throw new BadRequestException("articleImage,bannerImageWeb and mobile are required");
     }
 
-    const [imageWebURL, imageMobileURL] = await Promise.all(
-      images.map(async (image) => await this.s3Service.upload(image)),
-    );
+    const filesToUpload = [this.s3Service.upload(articleImage), this.s3Service.upload(bannerImageWeb), this.s3Service.upload(bannerImageMobile)];
 
-    createArticleDto.imageWeb = imageWebURL;
+    const [articleImageURL, bannerImageWebURL, bannerImageMobileURL] = await Promise.all(filesToUpload);
 
-    createArticleDto.imageMobile = imageMobileURL;
+    // @ts-ignore
+    createArticleDto.articleImage = articleImageURL;
+
+    createArticleDto.imageWeb = bannerImageWebURL;
+
+    createArticleDto.imageMobile = bannerImageMobileURL;
 
     return await this.articlesService.create(createArticleDto);
   }
 
-  @Patch('update/:id')
+  @Patch("update/:id")
   @UseFilters(PrismaClientExceptionFilter)
-  @UseInterceptors(FilesInterceptor('images'))
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: "articleImage", maxCount: 1 },
+      {
+        name: "bannerImageWeb",
+        maxCount: 1
+      }, {
+      name: "bannerImageMobile",
+      maxCount: 1
+    }
+    ],
+    { storage: STORAGE }
+  ))
   async update(
     @Body() updateArticleDto: Prisma.ArticlesUpdateInput,
-    @UploadedFiles() images: Express.Multer.File[],
-    @Param('id') id: string,
+    @UploadedFiles() files: {
+      articleImage?: Express.Multer.File[];
+      bannerImageWeb?: Express.Multer.File[];
+      bannerImageMobile?: Express.Multer.File[];
+    },
+    @Param("id") id: string
   ) {
-    if (images && images.length == 2) {
-      const [imageWebURL, imageMobileURL] = await Promise.all(
-        images.map(async (image) => await this.s3Service.upload(image)),
-      );
 
-      updateArticleDto.imageWeb = imageWebURL;
+    const articleImage = files.articleImage[0];
+    const bannerImageWeb = files.bannerImageWeb[0];
+    const bannerImageMobile = files.bannerImageMobile[0];
 
-      updateArticleDto.imageMobile = imageMobileURL;
+    if (articleImage) {
+      // @ts-ignore
+      updateArticleDto.articleImage = await this.s3Service.upload(articleImage);
     }
+
+    if (bannerImageWeb) {
+      updateArticleDto.imageWeb = await this.s3Service.upload(bannerImageWeb);
+    }
+
+    if (bannerImageMobile) {
+      updateArticleDto.imageMobile = await this.s3Service.upload(bannerImageMobile);
+    }
+
     return await this.articlesService.update(id, updateArticleDto);
   }
 
-  @Get('all')
+  @Get("all")
   @UseFilters(PrismaClientExceptionFilter)
   async findAll(
-    @Query('isPublished', new ParseBoolPipe({ optional: true }))
-    isPublished: boolean,
+    @Query("isPublished", new ParseBoolPipe({ optional: true }))
+      isPublished: boolean
   ) {
     return await this.articlesService.findAll(isPublished);
   }
 
-  @Get('single/:id')
+  @Get("single/:id")
   @UseFilters(PrismaClientExceptionFilter)
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param("id") id: string) {
     return await this.articlesService.findOne(id);
   }
 
-  @Delete('remove/:id')
+  @Delete("remove/:id")
   @UseFilters(PrismaClientExceptionFilter)
-  async remove(@Param('id') id: string) {
+  async remove(@Param("id") id: string) {
     return await this.articlesService.remove(id);
   }
 }
