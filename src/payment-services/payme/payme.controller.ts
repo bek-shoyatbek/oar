@@ -14,6 +14,7 @@ import { log } from 'console';
 @Controller('payme')
 export class PaymeController {
   constructor(private readonly paymeService: PaymeService) {}
+
   @Post()
   @UseGuards(PaymeBasicAuthGuard)
   @HttpCode(HttpStatus.OK)

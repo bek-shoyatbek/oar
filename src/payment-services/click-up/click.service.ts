@@ -5,7 +5,6 @@ import { ObjectId } from 'mongodb';
 import { PrismaService } from 'src/prisma.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
-import { CreateMd5Params } from './interfaces/create-md5.interface';
 import { ClickError } from 'src/enums/Payment.enum';
 
 @Injectable()
@@ -87,6 +86,22 @@ export class ClickService {
       return {
         error_code: ClickError.AlreadyPaid,
         error_note: 'Already paid',
+      };
+    }
+
+    const isCancelled = await this.prismaService.transactions.findFirst({
+      where: {
+        userId: userId,
+        planId: planId,
+        status: 'CANCELED',
+      },
+    });
+
+    if (isCancelled) {
+      console.error('Transaction cancelled');
+      return {
+        error_code: ClickError.TransactionCanceled,
+        error_note: 'Cancelled',
       };
     }
 
@@ -176,7 +191,6 @@ export class ClickService {
     const userId = clickReqBody.param2;
     const transId = clickReqBody.click_trans_id + '';
     const serviceId = clickReqBody.service_id;
-    const prepareId = clickReqBody.merchant_prepare_id;
     const amount = clickReqBody.amount;
     const signTime = clickReqBody.sign_time;
     const error = clickReqBody.error;
@@ -241,6 +255,8 @@ export class ClickService {
     const isPrepared = await this.prismaService.transactions.findFirst({
       where: {
         prepareId: +clickReqBody.merchant_prepare_id,
+        userId: userId,
+        planId: planId,
       },
     });
 
@@ -344,12 +360,6 @@ export class ClickService {
 
   checkObjectId(id: string) {
     return ObjectId.isValid(id);
-  }
-
-  generateMd5Hash(content: CreateMd5Params) {
-    return this.hashingService.md5(
-      `${content.clickTransId}${content.serviceId}${content.secretKey}${content.merchantTransId}${content.merchantPrepareId}${content.amount}${content.action}${content.signTime}`,
-    );
   }
 
   verifyMd5Hash(incomingSign: string, mySign: string) {

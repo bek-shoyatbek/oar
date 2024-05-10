@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { createHash } from 'node:crypto';
-import { CreateMd5Params } from 'src/payments/click/interfaces/create-md5.interface';
+import { CreateMd5Params } from 'src/payment-services/click-up/interfaces/create-md5.interface';
 
 @Injectable()
 export class HashingService {
