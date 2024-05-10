@@ -190,7 +190,8 @@ export class ClickService {
   async complete(clickReqBody: ClickRequestDto) {
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
-    const transId = clickReqBody.click_trans_id + '';
+    const prepareId = clickReqBody.merchant_prepare_id;
+    const transId = clickReqBody.click_trans_id;
     const serviceId = clickReqBody.service_id;
     const amount = clickReqBody.amount;
     const signTime = clickReqBody.sign_time;
@@ -198,7 +199,7 @@ export class ClickService {
 
     const secretKey = this.configService.get<string>('CLICK_SECRET');
     const md5Hash = this.hashingService.md5(
-      `${transId}${serviceId}${secretKey}${planId}${amount}${clickReqBody.action}${signTime}`,
+      `${transId}${serviceId}${secretKey}${planId}${prepareId}${amount}${clickReqBody.action}${signTime}`,
     );
     const isValidSignature = this.verifyMd5Hash(
       clickReqBody.sign_string,
@@ -295,7 +296,7 @@ export class ClickService {
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
-        transId,
+        transId: `${transId}`,
       },
     });
 
