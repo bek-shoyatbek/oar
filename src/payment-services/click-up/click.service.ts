@@ -55,13 +55,13 @@ export class ClickService {
       md5Hash,
     );
 
-    // if (!isValidSignature) {
-    //   console.error('Invalid sign_string');
-    //   return {
-    //     error_code: ClickError.SignFailed,
-    //     error_note: 'Invalid sign_string',
-    //   };
-    // }
+    if (!isValidSignature) {
+      console.error('Invalid sign_string');
+      return {
+        error_code: ClickError.SignFailed,
+        error_note: 'Invalid sign_string',
+      };
+    }
 
     const isValidPlanId = this.checkObjectId(planId);
 
@@ -205,14 +205,14 @@ export class ClickService {
       md5Hash,
     );
 
-    // if (!isValidSignature) {
-    //   console.error('Invalid sign_string');
-    //   return {
-    //     error_code: ClickError.SignFailed,
-    //     error_note: 'Invalid sign_string',
-    //   };
-    // }
-    //
+    if (!isValidSignature) {
+      console.error('Invalid sign_string');
+      return {
+        error_code: ClickError.SignFailed,
+        error_note: 'Invalid sign_string',
+      };
+    }
+
     const isValidPlanId = this.checkObjectId(planId);
 
     const isValidUserId = this.checkObjectId(userId);
@@ -336,16 +336,8 @@ export class ClickService {
 
     await this.prismaService.myCourses.create({
       data: {
-        user: {
-          connect: {
-            id: transaction.userId,
-          },
-        },
-        plan: {
-          connect: {
-            id: transaction.planId,
-          },
-        },
+        userId: transaction.userId,
+        planId: transaction.planId,
         courseId: plan.courseId,
       },
     });
