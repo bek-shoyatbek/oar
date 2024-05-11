@@ -64,7 +64,6 @@ export class ArticlesController {
 
     const [articleImageURL, bannerImageWebURL, bannerImageMobileURL] = await Promise.all(filesToUpload);
 
-    // @ts-ignore
     createArticleDto.articleImage = articleImageURL;
 
     createArticleDto.imageWeb = bannerImageWebURL;
@@ -104,7 +103,6 @@ export class ArticlesController {
     const bannerImageMobile = files.bannerImageMobile[0];
 
     if (articleImage) {
-      // @ts-ignore
       updateArticleDto.articleImage = await this.s3Service.upload(articleImage);
     }
 
