@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { log } from 'console';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -11,6 +10,7 @@ export class PlansService {
   
     return await this.prismaService.plans.create({
       data: {
+        title: createPlanDto.title,
         available_period: +createPlanDto.available_period,
         courseId,
         price: +createPlanDto.price,
