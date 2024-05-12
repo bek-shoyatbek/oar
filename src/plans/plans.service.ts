@@ -7,10 +7,9 @@ export class PlansService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createPlanDto: Prisma.PlansCreateInput, courseId: string) {
-  
     return await this.prismaService.plans.create({
       data: {
-        title: createPlanDto.title,
+        ...createPlanDto,
         available_period: +createPlanDto.available_period,
         courseId,
         price: +createPlanDto.price,

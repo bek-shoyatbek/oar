@@ -99,7 +99,8 @@ model Plans {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  title            String
+  titleUz          String
+  titleRu          String
   available_period Int // in month
   includeResources Boolean        @default(false)
   includeSupport   Boolean        @default(false)

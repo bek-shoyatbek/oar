@@ -98,9 +98,9 @@ export class ArticlesController {
     @Param("id") id: string
   ) {
 
-    const articleImage = files.articleImage[0];
-    const bannerImageWeb = files.bannerImageWeb[0];
-    const bannerImageMobile = files.bannerImageMobile[0];
+    const articleImage = files?.articleImage[0];
+    const bannerImageWeb = files?.bannerImageWeb[0];
+    const bannerImageMobile = files?.bannerImageMobile[0];
 
     if (articleImage) {
       updateArticleDto.articleImage = await this.s3Service.upload(articleImage);
