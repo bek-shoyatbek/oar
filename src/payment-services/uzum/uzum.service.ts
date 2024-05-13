@@ -30,8 +30,6 @@ export class UzumService {
       });
     }
 
-    info('checkTransactionDto', checkTransactionDto);
-
     const isValidObjectId = ObjectId.isValid(checkTransactionDto.params.planId);
 
     if (!isValidObjectId) {
@@ -86,7 +84,6 @@ export class UzumService {
         errorCode: ErrorStatusCode.ErrorCheckingPaymentData,
       });
     }
-    info('createTransactionDto', createTransactionDto);
 
     const isExistingTransaction =
       await this.prismaService.transactions.findUnique({
@@ -207,8 +204,6 @@ export class UzumService {
       });
     }
 
-    info('confirmTransactionDto', confirmTransactionDto);
-
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: confirmTransactionDto.transId,
@@ -302,8 +297,6 @@ export class UzumService {
       });
     }
 
-    info('reverseTransactionDto', reverseTransactionDto);
-
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: reverseTransactionDto.transId,
@@ -356,8 +349,6 @@ export class UzumService {
         errorCode: ErrorStatusCode.InvalidServiceId,
       });
     }
-
-    info('checkTransactionDto', checkTransactionDto);
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
