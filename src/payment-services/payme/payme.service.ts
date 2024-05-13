@@ -11,6 +11,7 @@ import { ErrorStatusCodes } from './constants/error-status-codes';
 import { TransactionState } from './constants/transaction-state';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { PaymeError } from './constants/payme-error';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class PaymeService {
@@ -114,8 +115,8 @@ export class PaymeService {
    */
   async createTransaction(createTransactionDto: CreateTransactionDto) {
     const planId = createTransactionDto.params?.account?.planId;
-
     const userId = createTransactionDto.params?.account?.user_id;
+    const transId = createTransactionDto.params?.id;
 
     const plan = await this.prismaService.plans.findUnique({
       where: {
@@ -143,40 +144,58 @@ export class PaymeService {
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
-        transId: createTransactionDto.params.id,
+        transId,
       },
     });
 
     if (transaction) {
+      if (transaction.status !== 'PENDING') {
+        return {
+          error: PaymeError.CantDoOperation,
+        };
+      }
+
+      // ! todo: check if transaction is expired
+      if (this.checkTransactionExpiration(transaction.createdAt)) {
+        await this.prismaService.transactions.update({
+          where: {
+            transId,
+          },
+          data: {
+            status: 'CANCELED',
+          },
+        });
+
+        return {
+          error: { ...PaymeError.CantDoOperation, state: -1, reason: 4 },
+        };
+      }
+
       return {
-        error: PaymeError.Pending,
+        result: {
+          transaction: transId,
+          state: TransactionState.Pending,
+          create_time: new Date(transaction.createdAt).getTime(),
+        },
       };
     }
 
-    if (plan.price !== createTransactionDto.params.amount) {
-      return {
-        error: PaymeError.InvalidAmount,
-      };
-    }
-
-    const existingTransaction = await this.prismaService.transactions.findFirst(
-      {
-        where: {
-          userId: createTransactionDto.params.account.user_id,
-          planId: createTransactionDto.params.account.planId,
+    const checkTransaction: CheckPerformTransactionDto = {
+      method: TransactionMethods.CheckPerformTransaction,
+      params: {
+        amount: plan.price,
+        account: {
+          planId,
+          user_id: userId,
         },
       },
-    );
+    };
 
-    if (existingTransaction?.status == 'PAID') {
-      return {
-        error: PaymeError.AlreadyDone,
-      };
-    }
+    const checkResult = await this.checkPerformTransaction(checkTransaction);
 
-    if (existingTransaction?.status == 'CANCELED') {
+    if (checkResult.error) {
       return {
-        error: PaymeError.CantDoOperation,
+        error: checkResult.error,
       };
     }
 
@@ -453,5 +472,17 @@ export class PaymeService {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + availablePeriod);
     return expirationDate;
+  }
+
+  private checkTransactionExpiration(createdAt: Date) {
+    const transactionCreatedAt = new Date(createdAt);
+    const timeoutDuration = 720;
+    const timeoutThreshold = DateTime.now()
+      .minus({
+        minutes: timeoutDuration,
+      })
+      .toJSDate();
+
+    return transactionCreatedAt < timeoutThreshold;
   }
 }
