@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { ClickError } from 'src/enums/Payment.enum';
+import { info } from 'node:console';
 
 @Injectable()
 export class ClickService {
@@ -41,6 +42,7 @@ export class ClickService {
 
   async prepare(clickReqBody: ClickRequestDto) {
     const secretKey = this.configService.get<string>('CLICK_SECRET');
+    info('step 1', clickReqBody);
 
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
@@ -62,6 +64,7 @@ export class ClickService {
         error_note: 'Invalid sign_string',
       };
     }
+    info('step 2:', 'sign_string is valid');
 
     const isValidPlanId = this.checkObjectId(planId);
 
@@ -74,6 +77,8 @@ export class ClickService {
         error_note: 'Invalid planId or userId',
       };
     }
+
+    info('step 3:', 'planId and userId are valid');
     const isAlreadyPaid = await this.prismaService.transactions.findFirst({
       where: {
         userId: userId,
@@ -90,6 +95,8 @@ export class ClickService {
       };
     }
 
+    info('step 4:', 'transaction is not paid');
+
     const isCancelled = await this.prismaService.transactions.findFirst({
       where: {
         userId: userId,
@@ -105,6 +112,8 @@ export class ClickService {
         error_note: 'Cancelled',
       };
     }
+
+    info('step 5:', 'transaction is not cancelled');
 
     const user = await this.prismaService.users.findUnique({
       where: {
@@ -134,6 +143,8 @@ export class ClickService {
       };
     }
 
+    info('step 6:', 'plan and user are valid');
+
     if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
       return {
@@ -141,6 +152,8 @@ export class ClickService {
         error_note: 'Invalid amount',
       };
     }
+
+    info('step 7:', 'amount is valid');
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
@@ -154,6 +167,8 @@ export class ClickService {
         error_note: 'Transaction canceled',
       };
     }
+
+    info('step 8:', 'transaction is not canceled');
 
     const time = new Date().getTime();
 
@@ -177,6 +192,8 @@ export class ClickService {
         createdAt: new Date(time),
       },
     });
+
+    info('step 9:', 'transaction is created');
 
     return {
       click_trans_id: +transId,
@@ -214,6 +231,7 @@ export class ClickService {
       };
     }
 
+    info("complete: step 1: 'sign_string' is valid");
     const isValidPlanId = this.checkObjectId(planId);
 
     const isValidUserId = this.checkObjectId(userId);
@@ -254,6 +272,7 @@ export class ClickService {
       };
     }
 
+    info("complete: step 2: 'plan' and 'user' are valid");
     const isPrepared = await this.prismaService.transactions.findFirst({
       where: {
         prepareId: +clickReqBody.merchant_prepare_id,
@@ -270,6 +289,7 @@ export class ClickService {
       };
     }
 
+    info("complete: step 3: 'merchant_prepare_id' is valid");
     const isAlreadyPaid = await this.prismaService.transactions.findFirst({
       where: {
         planId,
@@ -285,6 +305,8 @@ export class ClickService {
         error_note: 'Already paid',
       };
     }
+
+    info("complete: step 4: 'merchant_prepare_id' is not paid yet");
 
     if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
@@ -323,6 +345,7 @@ export class ClickService {
       };
     }
 
+    info("complete: step 6: 'error' is 0");
     // update payment status
     await this.prismaService.transactions.update({
       where: {
@@ -348,6 +371,8 @@ export class ClickService {
         courseId: plan.courseId,
       },
     });
+
+    info("complete: step 7: 'transaction' is updated");
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,
