@@ -11,7 +11,7 @@ export class PlansService {
     return await this.prismaService.plans.create({
       data: {
         ...createPlanDto,
-        available_period: +createPlanDto.available_period,
+        availablePeriod: +createPlanDto.availablePeriod,
         courseId,
         price: +createPlanDto.price,
       },

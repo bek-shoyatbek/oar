@@ -15,8 +15,6 @@ datasource db {
 
 model Users {
   id           String         @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
   email        String?
   phone        String?
   password     String
@@ -25,51 +23,48 @@ model Users {
   refreshToken String?
   Transactions Transactions[]
   MyCourse     MyCourses[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 }
 
 model Admin {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  username String
-  password String
-
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Courses {
   id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
   titleUz       String?
   titleRu       String?
   image         String?
   descriptionUz String?
   descriptionRu String?
   courseStatus  CourseStatus @default(inProgress)
-
-  Module Modules[]
-
-  MyCourses   MyCourses? @relation(fields: [myCoursesId], references: [id])
-  myCoursesId String?    @db.ObjectId
+  Module        Modules[]
+  MyCourses     MyCourses?   @relation(fields: [myCoursesId], references: [id])
+  myCoursesId   String?      @db.ObjectId
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 }
 
 model Modules {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
   titleUz       String?
   titleRu       String?
   descriptionUz String?
   descriptionRu String?
   course        Courses   @relation(fields: [courseId], references: [id])
   courseId      String    @db.ObjectId
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   Lesson        Lessons[]
 }
 
 model Lessons {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
   titleUz       String?
   titleRu       String?
   video         String
@@ -78,12 +73,12 @@ model Lessons {
   attachedFiles String[] @default([])
   module        Modules  @relation(fields: [moduleId], references: [id])
   moduleId      String   @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model Transactions {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
   provider  PaymentProvider
   transId   String?           @unique
   amount    Float
@@ -93,41 +88,41 @@ model Transactions {
   userId    String            @db.ObjectId
   plan      Plans             @relation(fields: [planId], references: [id])
   planId    String            @db.ObjectId
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
 }
 
 model Plans {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
   titleUz          String
   titleRu          String
-  available_period Int // in month
+  availablePeriod  Int // in month
   includeResources Boolean        @default(false)
   includeSupport   Boolean        @default(false)
   price            Float
   courseId         String         @db.ObjectId
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   Transactions     Transactions[]
   MyCourses        MyCourses[]
 }
 
 model MyCourses {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  courseId String    @db.ObjectId
-  planId   String    @db.ObjectId
-  plan     Plans     @relation(fields: [planId], references: [id])
-  user     Users     @relation(fields: [userId], references: [id])
-  userId   String    @unique @db.ObjectId
-  Courses  Courses[]
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  courseId       String    @db.ObjectId
+  planId         String    @db.ObjectId
+  plan           Plans     @relation(fields: [planId], references: [id])
+  user           Users     @relation(fields: [userId], references: [id])
+  userId         String    @unique @db.ObjectId
+  purchaseDate   DateTime  @default(now())
+  expirationDate DateTime
+  Courses        Courses[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
 
 model Articles {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   titleUz      String
   titleRu      String
   headlineUz   String
@@ -138,29 +133,29 @@ model Articles {
   imageWeb     String
   imageMobile  String
   link         String
-  isPublished  Boolean @default(false)
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Banners {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   imageWeb    String
   imageMobile String
   link        String
-  isPublished Boolean @default(false)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Comments {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   username    String
   userAvatar  String
   text        String
-  isPublished Boolean @default(false)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum TransactionStatus {
