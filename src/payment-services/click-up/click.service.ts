@@ -358,21 +358,13 @@ export class ClickService {
 
     // FIXME : create course
 
-    // await this.prismaService.myCourses.create({
-    //   data: {
-    //     user: {
-    //       connect: {
-    //         id: transaction.userId,
-    //       },
-    //     },
-    //     plan: {
-    //       connect: {
-    //         id: transaction.planId,
-    //       },
-    //     },
-    //     courseId: plan.courseId,
-    //   },
-    // });
+    await this.prismaService.myCourses.create({
+      data: {
+        userId,
+        courseId: plan.courseId,
+        planId,
+      },
+    });
 
     info("complete: step 7: 'transaction' is updated");
 
