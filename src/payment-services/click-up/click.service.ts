@@ -22,7 +22,7 @@ export class ClickService {
     if (isNaN(actionType)) {
       console.error('Invalid action');
       return {
-        error_code: ClickError.ActionNotFound,
+        error: ClickError.ActionNotFound,
         error_note: 'Invalid action',
       };
     }
@@ -33,7 +33,7 @@ export class ClickService {
       return this.complete(clickReqBody);
     } else {
       return {
-        error_code: ClickError.ActionNotFound,
+        error: ClickError.ActionNotFound,
         error_note: 'Invalid action',
       };
     }
@@ -58,7 +58,7 @@ export class ClickService {
     if (!isValidSignature) {
       console.error('Invalid sign_string');
       return {
-        error_code: ClickError.SignFailed,
+        error: ClickError.SignFailed,
         error_note: 'Invalid sign_string',
       };
     }
@@ -70,7 +70,7 @@ export class ClickService {
     if (!isValidPlanId || !isValidUserId) {
       console.error('Invalid planId or userId');
       return {
-        error_code: ClickError.BadRequest,
+        error: ClickError.BadRequest,
         error_note: 'Invalid planId or userId',
       };
     }
@@ -85,7 +85,7 @@ export class ClickService {
     if (isAlreadyPaid) {
       console.error('Already paid');
       return {
-        error_code: ClickError.AlreadyPaid,
+        error: ClickError.AlreadyPaid,
         error_note: 'Already paid',
       };
     }
@@ -101,7 +101,7 @@ export class ClickService {
     if (isCancelled) {
       console.error('Transaction cancelled');
       return {
-        error_code: ClickError.TransactionCanceled,
+        error: ClickError.TransactionCanceled,
         error_note: 'Cancelled',
       };
     }
@@ -115,7 +115,7 @@ export class ClickService {
     if (!user) {
       console.error('Invalid userId');
       return {
-        error_code: ClickError.UserNotFound,
+        error: ClickError.UserNotFound,
         error_note: 'Invalid userId',
       };
     }
@@ -129,7 +129,7 @@ export class ClickService {
     if (!plan) {
       console.error('Invalid planId');
       return {
-        error_code: ClickError.BadRequest,
+        error: ClickError.BadRequest,
         error_note: 'Product not found',
       };
     }
@@ -137,7 +137,7 @@ export class ClickService {
     if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
       return {
-        error_code: ClickError.InvalidAmount,
+        error: ClickError.InvalidAmount,
         error_note: 'Invalid amount',
       };
     }
@@ -150,7 +150,7 @@ export class ClickService {
 
     if (transaction && transaction.status == 'CANCELED') {
       return {
-        error_code: ClickError.TransactionCanceled,
+        error: ClickError.TransactionCanceled,
         error_note: 'Transaction canceled',
       };
     }
@@ -209,7 +209,7 @@ export class ClickService {
     if (!isValidSignature) {
       console.error('Invalid sign_string');
       return {
-        error_code: ClickError.SignFailed,
+        error: ClickError.SignFailed,
         error_note: 'Invalid sign_string',
       };
     }
@@ -221,7 +221,7 @@ export class ClickService {
     if (!isValidPlanId || !isValidUserId) {
       console.error('Invalid planId or userId');
       return {
-        error_code: ClickError.BadRequest,
+        error: ClickError.BadRequest,
         error_note: 'Invalid planId or userId',
       };
     }
@@ -235,7 +235,7 @@ export class ClickService {
     if (!user) {
       console.error('Invalid userId');
       return {
-        error_code: ClickError.UserNotFound,
+        error: ClickError.UserNotFound,
         error_note: 'Invalid userId',
       };
     }
@@ -249,7 +249,7 @@ export class ClickService {
     if (!plan) {
       console.error('Invalid planId');
       return {
-        error_code: ClickError.BadRequest,
+        error: ClickError.BadRequest,
         error_note: 'Invalid planId',
       };
     }
@@ -265,7 +265,7 @@ export class ClickService {
     if (!isPrepared) {
       console.error('Invalid merchant_prepare_id');
       return {
-        error_code: ClickError.TransactionNotFound,
+        error: ClickError.TransactionNotFound,
         error_note: 'Invalid merchant_prepare_id',
       };
     }
@@ -281,7 +281,7 @@ export class ClickService {
     if (isAlreadyPaid) {
       console.error('Already paid');
       return {
-        error_code: ClickError.AlreadyPaid,
+        error: ClickError.AlreadyPaid,
         error_note: 'Already paid',
       };
     }
@@ -289,7 +289,7 @@ export class ClickService {
     if (parseInt(`${amount}`) !== plan.price) {
       console.error('Invalid amount');
       return {
-        error_code: ClickError.InvalidAmount,
+        error: ClickError.InvalidAmount,
         error_note: 'Invalid amount',
       };
     }
@@ -303,12 +303,10 @@ export class ClickService {
     if (transaction && transaction.status == 'CANCELED') {
       console.error('Already cancelled');
       return {
-        error_code: ClickError.TransactionCanceled,
+        error: ClickError.TransactionCanceled,
         error_note: 'Already cancelled',
       };
     }
-
-    const time = new Date().getTime();
 
     if (error > 0) {
       await this.prismaService.transactions.update({
@@ -320,8 +318,8 @@ export class ClickService {
         },
       });
       return {
-        error_code: error,
-        error_msg: 'Failed',
+        error: error,
+        error_note: 'Failed',
       };
     }
 
@@ -354,9 +352,8 @@ export class ClickService {
     return {
       click_trans_id: +clickReqBody.click_trans_id,
       merchant_trans_id: planId,
-      merchant_confirm_id: time,
-      error_code: ClickError.Success,
-      error_msg: 'Success',
+      error: ClickError.Success,
+      error_note: 'Success',
     };
   }
 
