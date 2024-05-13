@@ -10,7 +10,6 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { ErrorStatusCodes } from './constants/error-status-codes';
 import { TransactionState } from './constants/transaction-state';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
-import { log } from 'console';
 import { PaymeError } from './constants/payme-error';
 
 @Injectable()
@@ -282,19 +281,14 @@ export class PaymeService {
       },
     });
 
+    const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
+
     await this.prismaService.myCourses.create({
       data: {
-        user: {
-          connect: {
-            id: transaction.userId,
-          },
-        },
-        plan: {
-          connect: {
-            id: transaction.planId,
-          },
-        },
+        userId: transaction.userId,
         courseId: plan.courseId,
+        planId: transaction.planId,
+        expirationDate,
       },
     });
 
@@ -453,5 +447,11 @@ export class PaymeService {
         }),
       },
     };
+  }
+
+  private calculateExpirationDate(availablePeriod: number): Date {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + availablePeriod);
+    return expirationDate;
   }
 }
