@@ -210,6 +210,9 @@ export class UzumService {
       },
     });
 
+    const planId = transaction.planId;
+    const userId = transaction.userId;
+
     if (!transaction) {
       error('Invalid transaction id');
       throw new BadRequestException({
@@ -249,19 +252,14 @@ export class UzumService {
       },
     });
 
+    const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
+
     await this.prismaService.myCourses.create({
       data: {
-        user: {
-          connect: {
-            id: transaction.userId,
-          },
-        },
-        plan: {
-          connect: {
-            id: transaction.planId,
-          },
-        },
+        userId,
         courseId: plan.courseId,
+        planId,
+        expirationDate,
       },
     });
 
@@ -317,6 +315,7 @@ export class UzumService {
     await this.prismaService.myCourses.delete({
       where: {
         userId: transaction.userId,
+        planId: transaction.planId,
       },
     });
 
@@ -370,6 +369,11 @@ export class UzumService {
       transId: checkTransactionDto.transId,
       status: transaction.status,
     };
+  }
+  private calculateExpirationDate(availablePeriod: number): Date {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + availablePeriod);
+    return expirationDate;
   }
 
   private checkServiceId(serviceId: number) {

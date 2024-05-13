@@ -96,7 +96,7 @@ model Plans {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
   titleUz          String
   titleRu          String
-  availablePeriod  Int // in month
+  availablePeriod  Int // ! In days
   includeResources Boolean        @default(false)
   includeSupport   Boolean        @default(false)
   price            Float

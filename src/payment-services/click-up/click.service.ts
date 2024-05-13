@@ -319,11 +319,14 @@ export class ClickService {
       },
     });
 
+    const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
+
     await this.prismaService.myCourses.create({
       data: {
         userId,
         courseId: plan.courseId,
         planId,
+        expirationDate,
       },
     });
 
@@ -335,11 +338,17 @@ export class ClickService {
     };
   }
 
-  checkObjectId(id: string) {
+  private checkObjectId(id: string) {
     return ObjectId.isValid(id);
   }
 
-  verifyMd5Hash(incomingSign: string, mySign: string) {
+  private calculateExpirationDate(availablePeriod: number): Date {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + availablePeriod);
+    return expirationDate;
+  }
+
+  private verifyMd5Hash(incomingSign: string, mySign: string) {
     return incomingSign == mySign;
   }
 }
