@@ -390,7 +390,7 @@ export class PaymeService {
         result: {
           cancel_time: transaction.cancelTime.getTime(),
           transaction: transaction.id,
-          state: -2,
+          state: -1,
         },
       };
     }
