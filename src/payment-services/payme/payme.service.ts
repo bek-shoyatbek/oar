@@ -357,7 +357,7 @@ export class PaymeService {
         result: {
           cancel_time: cancelTransaction.cancelTime.getTime(),
           transaction: cancelTransaction.id,
-          status: -1,
+          state: -1,
         },
       };
     }
@@ -376,7 +376,7 @@ export class PaymeService {
         result: {
           cancel_time: transaction.cancelTime.getTime(),
           transaction: transaction.id,
-          status: -2,
+          state: -2,
         },
       };
     }
@@ -402,7 +402,7 @@ export class PaymeService {
       result: {
         cancel_time: updatedTransaction.cancelTime.getTime(),
         transaction: updatedTransaction.id,
-        status: -2,
+        state: -2,
       },
     };
   }
