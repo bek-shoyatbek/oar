@@ -12,6 +12,7 @@ import { TransactionState } from './constants/transaction-state';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { PaymeError } from './constants/payme-error';
 import { DateTime } from 'luxon';
+import { CancelingReasons } from './constants/canceling-reasons';
 
 @Injectable()
 export class PaymeService {
@@ -329,6 +330,17 @@ export class PaymeService {
   async cancelTransaction(cancelTransactionDto: CancelTransactionDto) {
     const transId = cancelTransactionDto.params.id;
 
+    let responseReason = -1;
+    const cancelationReason = cancelTransactionDto.params.reason;
+
+    if (cancelationReason === CancelingReasons.Refund) {
+      responseReason = -2;
+    }
+
+    if (cancelationReason === CancelingReasons.TransactionFailed) {
+      responseReason = -1;
+    }
+
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId,
@@ -350,6 +362,7 @@ export class PaymeService {
         data: {
           status: 'CANCELED',
           cancelTime: new Date(),
+          reason: responseReason,
         },
       });
 
@@ -370,6 +383,7 @@ export class PaymeService {
         data: {
           status: 'CANCELED',
           cancelTime: new Date(),
+          reason: responseReason,
         },
       });
       return {
@@ -395,6 +409,7 @@ export class PaymeService {
       data: {
         status: 'CANCELED',
         cancelTime: new Date(),
+        reason: responseReason,
       },
     });
 
