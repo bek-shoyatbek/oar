@@ -177,7 +177,7 @@ export class PaymeService {
 
       return {
         result: {
-          transaction: transId,
+          transaction: transaction.id,
           state: TransactionState.Pending,
           create_time: new Date(transaction.createdAt).getTime(),
         },
