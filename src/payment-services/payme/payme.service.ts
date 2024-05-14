@@ -370,7 +370,7 @@ export class PaymeService {
         result: {
           cancel_time: cancelTransaction.cancelTime.getTime(),
           transaction: cancelTransaction.id,
-          state: -1,
+          state: TransactionState.PendingCanceled,
         },
       };
     }
@@ -390,7 +390,7 @@ export class PaymeService {
         result: {
           cancel_time: transaction.cancelTime.getTime(),
           transaction: transaction.id,
-          state: -1,
+          state: TransactionState.PendingCanceled,
         },
       };
     }
@@ -417,7 +417,7 @@ export class PaymeService {
       result: {
         cancel_time: updatedTransaction.cancelTime.getTime(),
         transaction: updatedTransaction.id,
-        state: -2,
+        state: TransactionState.PaidCanceled,
       },
     };
   }
