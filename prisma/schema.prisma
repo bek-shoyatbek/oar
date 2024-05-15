@@ -153,13 +153,15 @@ model Banners {
 }
 
 model Comments {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  username    String
-  occupation  String?
-  text        String
-  isPublished Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  username     String
+  occupationUz String?
+  occupationRu String?
+  textUz       String
+  textRu       String
+  isPublished  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 enum TransactionStatus {
