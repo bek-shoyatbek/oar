@@ -330,17 +330,6 @@ export class PaymeService {
   async cancelTransaction(cancelTransactionDto: CancelTransactionDto) {
     const transId = cancelTransactionDto.params.id;
 
-    let responseReason = -1;
-    const cancelationReason = cancelTransactionDto.params.reason;
-
-    if (cancelationReason === CancelingReasons.Refund) {
-      responseReason = -2;
-    }
-
-    if (cancelationReason === CancelingReasons.TransactionFailed) {
-      responseReason = -1;
-    }
-
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId,
@@ -362,7 +351,7 @@ export class PaymeService {
         data: {
           status: 'CANCELED',
           cancelTime: new Date(),
-          reason: responseReason,
+          reason: cancelTransactionDto.params.reason,
         },
       });
 
@@ -399,7 +388,7 @@ export class PaymeService {
       data: {
         status: 'CANCELED',
         cancelTime: new Date(),
-        reason: responseReason,
+        reason: cancelTransactionDto.params.reason,
       },
     });
 
@@ -436,7 +425,7 @@ export class PaymeService {
         cancel_time: new Date(transaction.cancelTime).getTime(),
         transaction: transaction.id,
         state: this.identifyTransactionState(transaction.status),
-        reason: null,
+        reason: transaction.reason,
       },
     };
   }
