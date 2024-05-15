@@ -154,7 +154,7 @@ model Banners {
 model Comments {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   username    String
-  userAvatar  String
+  occupation  String?
   text        String
   isPublished Boolean  @default(false)
   createdAt   DateTime @default(now())
