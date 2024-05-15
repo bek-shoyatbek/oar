@@ -167,11 +167,17 @@ export class PaymeService {
           data: {
             status: 'CANCELED',
             cancelTime: new Date(),
+            state: TransactionState.PendingCanceled,
+            reason: CancelingReasons.CanceledDueToTimeout,
           },
         });
 
         return {
-          error: { ...PaymeError.CantDoOperation, state: -1, reason: 4 },
+          error: {
+            ...PaymeError.CantDoOperation,
+            state: TransactionState.PendingCanceled,
+            reason: CancelingReasons.CanceledDueToTimeout,
+          },
           id: transId,
         };
       }
@@ -219,6 +225,7 @@ export class PaymeService {
           },
         },
         provider: 'payme',
+        state: TransactionState.Pending,
         amount: createTransactionDto.params.amount,
       },
     });
@@ -262,7 +269,7 @@ export class PaymeService {
 
       return {
         result: {
-          state: TransactionState.Paid,
+          state: transaction.state,
           transaction: transaction.id,
           perform_time: new Date(transaction.performTime).getTime(),
         },
@@ -274,10 +281,21 @@ export class PaymeService {
     );
 
     if (expirationTime) {
+      await this.prismaService.transactions.update({
+        where: {
+          transId: performTransactionDto.params.id,
+        },
+        data: {
+          status: 'CANCELED',
+          cancelTime: new Date(),
+          state: TransactionState.PendingCanceled,
+          reason: CancelingReasons.CanceledDueToTimeout,
+        },
+      });
       return {
         error: {
-          state: -1,
-          reason: 4,
+          state: TransactionState.PendingCanceled,
+          reason: CancelingReasons.CanceledDueToTimeout,
           ...PaymeError.CantDoOperation,
         },
         id: performTransactionDto.params.id,
@@ -309,6 +327,7 @@ export class PaymeService {
       },
       data: {
         status: 'PAID',
+        state: TransactionState.Paid,
         performTime,
       },
     });
@@ -317,7 +336,7 @@ export class PaymeService {
       result: {
         transaction: updatedPayment.id,
         perform_time: performTime.getTime(),
-        state: 2,
+        state: TransactionState.Paid,
       },
     };
   }
@@ -350,6 +369,7 @@ export class PaymeService {
         },
         data: {
           status: 'CANCELED',
+          state: TransactionState.PendingCanceled,
           cancelTime: new Date(),
           reason: cancelTransactionDto.params.reason,
         },
@@ -364,12 +384,12 @@ export class PaymeService {
       };
     }
 
-    if (transaction.status === 'CANCELED') {
+    if (transaction.state !== TransactionState.Paid) {
       return {
         result: {
-          cancel_time: transaction.cancelTime.getTime(),
+          state: transaction.state,
           transaction: transaction.id,
-          state: TransactionState.PaidCanceled,
+          cancel_time: transaction.cancelTime.getTime(),
         },
       };
     }
@@ -387,6 +407,7 @@ export class PaymeService {
       },
       data: {
         status: 'CANCELED',
+        state: TransactionState.PaidCanceled,
         cancelTime: new Date(),
         reason: cancelTransactionDto.params.reason,
       },
@@ -424,7 +445,7 @@ export class PaymeService {
         perform_time: new Date(transaction.performTime).getTime(),
         cancel_time: new Date(transaction.cancelTime).getTime(),
         transaction: transaction.id,
-        state: this.identifyTransactionState(transaction.status),
+        state: transaction.state,
         reason: transaction.reason,
       },
     };
