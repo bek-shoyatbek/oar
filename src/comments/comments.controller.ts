@@ -8,22 +8,16 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UseFilters,
-  UseInterceptors,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { Prisma } from '@prisma/client';
-import { S3Service } from 'src/aws/s3/s3.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
 
 @Controller('comments')
 export class CommentsController {
-  constructor(
-    private readonly commentsService: CommentsService,
-    private readonly s3Service: S3Service,
-  ) {}
+  constructor(private readonly commentsService: CommentsService) {}
 
   @Post('create')
   @UseFilters(PrismaClientExceptionFilter)

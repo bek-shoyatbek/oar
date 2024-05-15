@@ -375,22 +375,12 @@ export class PaymeService {
       };
     }
 
-    if (transaction.status !== 'PAID') {
-      await this.prismaService.transactions.update({
-        where: {
-          id: transaction.id,
-        },
-        data: {
-          status: 'CANCELED',
-          cancelTime: new Date(),
-          reason: responseReason,
-        },
-      });
+    if (transaction.status === 'CANCELED') {
       return {
         result: {
           cancel_time: transaction.cancelTime.getTime(),
           transaction: transaction.id,
-          state: TransactionState.PendingCanceled,
+          state: TransactionState.PaidCanceled,
         },
       };
     }
