@@ -23,6 +23,12 @@ export class CoursesService {
     });
   }
 
+  async getMyCourses(userId: string) {
+    return await this.prismaService.myCourses.findMany({
+      where: { userId },
+    });
+  }
+
   async update(id: string, updateCourseDto: Prisma.CoursesUpdateInput) {
     const course = await this.prismaService.courses.findUnique({
       where: { id },

@@ -72,7 +72,6 @@ export class LessonsController {
   }
 
   @Get('single/:id')
-  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.lessonsService.findOne(id);

@@ -51,7 +51,6 @@ export class PlansController {
   }
 
   @Get('all/:courseId')
-  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async getAll(@Param('courseId') courseId: string) {
     return await this.plansService.findAll(courseId);

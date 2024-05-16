@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Request,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -75,8 +76,13 @@ export class CoursesController {
     return await this.coursesService.findAll(courseStatus);
   }
 
+  @Get('my-courses')
+  @UseFilters(PrismaClientExceptionFilter)
+  async myCourses(@Request() req) {
+    const userId = req?.user?.userId;
+    return await this.coursesService.getMyCourses(userId);
+  }
   @Get('single/:id')
-  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param() params: ValidateObjectIdDto) {
     return await this.coursesService.findOne(params.id);
