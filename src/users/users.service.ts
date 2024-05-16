@@ -8,7 +8,10 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
   async create(createUserDto: Prisma.UsersCreateInput) {
     const newUser = await this.prisma.users.create({
-      data: createUserDto,
+      data: {
+        ...createUserDto,
+        role: 'user',
+      },
     });
 
     return this.exclude(newUser, 'password');
@@ -46,6 +49,7 @@ export class UsersService {
       },
       data: {
         ...updateUserDto,
+        role: 'user',
       },
     });
 
