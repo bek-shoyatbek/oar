@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RegisterWithEmailDto } from './dto/register-with-email.dto';
 import { LoginWithEmailDto } from './dto/login-with-email.dto';
 import { RegisterWithPhoneDto } from './dto/register-with-phone.dto';
@@ -12,6 +17,8 @@ import { UsersService } from 'src/users/users.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { SmsService } from 'src/sms/sms.service';
 import { ResetUserPasswordDto } from './dto/reset-user-password.dto';
+import { ConfigService } from '@nestjs/config';
+import { JwtTokenPayload } from './types/jwt-token-payload';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +30,7 @@ export class AuthService {
     private userService: UsersService,
     private hashingService: HashingService,
     private readonly smsService: SmsService,
+    private configService: ConfigService,
   ) {}
 
   async registerWithEmail(registerWithEmailDto: RegisterWithEmailDto) {
@@ -64,43 +72,32 @@ export class AuthService {
   }
 
   async loginWithEmail(loginWithEmailDto: LoginWithEmailDto) {
-    const isValidEmail = await this.userService.findOneByEmail(
-      loginWithEmailDto.email,
-    );
-    if (!isValidEmail) {
-      throw new BadRequestException('Email not found');
+    const user = await this.userService.findOneByEmail(loginWithEmailDto.email);
+    if (!user) {
+      throw new BadRequestException('user with this email not found');
     }
 
     const isValidPassword = await this.hashingService.comparePassword(
       loginWithEmailDto.password,
-      isValidEmail.password,
+      user.password,
     );
 
     if (!isValidPassword) {
       throw new BadRequestException('Invalid password');
     }
 
-    const accessToken = await this.jwtService.signAsync(
-      {
-        userId: isValidEmail.id,
-      },
-      {
-        expiresIn: '1d',
-      },
-    );
-
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        userId: isValidEmail.id,
-      },
-      {
-        expiresIn: '30d',
-      },
-    );
-    return {
-      accessToken,
-      refreshToken,
+    const tokens = {
+      accessToken: this.generateAccessToken({
+        userId: user.id,
+        role: user.role,
+      }),
+      refreshToken: this.generateRefreshToken({
+        userId: user.id,
+        role: user.role,
+      }),
     };
+
+    return tokens;
   }
 
   async registerWithPhone(registerWithPhoneDto: RegisterWithPhoneDto) {
@@ -118,7 +115,7 @@ export class AuthService {
       'phone',
     );
 
-    const res = await this.smsService.sendSms({
+    await this.smsService.sendSms({
       phone: registerWithPhoneDto.phone,
       text: message,
     });
@@ -140,43 +137,31 @@ export class AuthService {
   }
 
   async loginWithPhone(loginWithPhoneDto: LoginWithPhoneDto) {
-    const isValidPhone = await this.userService.findOneByPhone(
-      loginWithPhoneDto.phone,
-    );
+    const user = await this.userService.findOneByPhone(loginWithPhoneDto.phone);
 
-    if (!isValidPhone) {
-      throw new BadRequestException('Phone not found');
+    if (!user) {
+      throw new BadRequestException('User with this phone not found');
     }
     const isValidPassword = await this.hashingService.comparePassword(
       loginWithPhoneDto.password,
-      isValidPhone.password,
+      user.password,
     );
 
     if (!isValidPassword) {
       throw new BadRequestException('Invalid password');
     }
 
-    const accessToken = await this.jwtService.signAsync(
-      {
-        userId: isValidPhone.id,
-      },
-      {
-        expiresIn: '1d',
-      },
-    );
-
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        userId: isValidPhone.id,
-      },
-      {
-        expiresIn: '30d',
-      },
-    );
-    return {
-      accessToken,
-      refreshToken,
+    const tokens = {
+      accessToken: this.generateAccessToken({
+        userId: user.id,
+        role: user.role,
+      }),
+      refreshToken: this.generateRefreshToken({
+        userId: user.id,
+        role: user.role,
+      }),
     };
+    return tokens;
   }
 
   async confirmCode(confirmCodeDto: ConfirmCodeDto) {
@@ -193,37 +178,27 @@ export class AuthService {
     if (credentials.code !== +confirmCodeDto.code) {
       throw new BadRequestException('Invalid code');
     }
-    const accessToken = await this.jwtService.signAsync(
-      {
-        userId: credentials.userData.id,
-      },
-      {
-        expiresIn: '1d',
-      },
-    );
 
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        userId: credentials.userData.id,
-      },
-      {
-        expiresIn: '30d',
-      },
-    );
+    const newUser = await this.userService.create(credentials.userData);
 
-    const newUser = {
-      ...credentials.userData,
-      refreshToken,
+    const tokens = {
+      accessToken: this.generateAccessToken({
+        userId: newUser.id,
+        role: newUser.role,
+      }),
+      refreshToken: this.generateRefreshToken({
+        userId: newUser.id,
+        role: newUser.role,
+      }),
     };
 
-    await this.userService.create(newUser);
+    await this.userService.update(newUser.id, {
+      refreshToken: tokens.refreshToken,
+    });
 
     await this.cacheManager.del(confirmCodeDto.sessionId);
 
-    return {
-      accessToken,
-      refreshToken,
-    };
+    return tokens;
   }
 
   async sendResetCodeByEmail(email: string) {
@@ -320,5 +295,43 @@ export class AuthService {
     await this.cacheManager.del(resetUserPasswordDto.sessionId);
 
     return { message: 'Password reset successfully' };
+  }
+
+  async refreshToken(refreshToken: string) {
+    try {
+      // Verify the refresh token
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('JWT_SECRET_REFRESH'), // Replace with your refresh token secret
+      });
+
+      // Check if the refresh token is valid and not expired
+      if (!payload) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // Generate a new access token
+      const accessToken = this.generateAccessToken({
+        userId: payload.userId,
+        role: payload.role,
+      });
+
+      return { accessToken };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  private generateRefreshToken(payload: JwtTokenPayload) {
+    return this.jwtService.sign(payload, {
+      expiresIn: '7d',
+      secret: this.configService.get<string>('JWT_SECRET_REFRESH'),
+    });
+  }
+
+  private generateAccessToken(payload: JwtTokenPayload) {
+    return this.jwtService.sign(payload, {
+      expiresIn: '1d',
+      secret: this.configService.get<string>('JWT_SECRET_ACCESS'),
+    });
   }
 }

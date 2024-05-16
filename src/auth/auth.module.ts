@@ -11,6 +11,7 @@ import { HashingService } from 'src/utils/hashing/hashing.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { SmsService } from 'src/sms/sms.service';
 import { HttpModule } from '@nestjs/axios';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -21,12 +22,13 @@ import { HttpModule } from '@nestjs/axios';
     }),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET_ACCESS,
       signOptions: { expiresIn: '1d' },
     }),
   ],
   controllers: [AuthController],
   providers: [
+    RolesGuard,
     AuthService,
     MailService,
     GeneratorService,
@@ -35,5 +37,6 @@ import { HttpModule } from '@nestjs/axios';
     HashingService,
     SmsService,
   ],
+  exports: [RolesGuard],
 })
 export class AuthModule {}

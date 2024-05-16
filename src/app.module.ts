@@ -23,6 +23,8 @@ import { PaymentsModule } from './payment-services/payments.module';
 import { BannersModule } from './banners/banners.module';
 import { CommentsModule } from './comments/comments.module';
 import { PlansModule } from './plans/plans.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth/guards/auth.guard';
 
 @Module({
   imports: [
@@ -64,6 +66,14 @@ import { PlansModule } from './plans/plans.module';
     PlansModule,
   ],
   controllers: [AppController],
-  providers: [AppService, GeneratorService, HashingService],
+  providers: [
+    AppService,
+    GeneratorService,
+    HashingService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

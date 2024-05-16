@@ -9,6 +9,7 @@ import {
   Post,
   UploadedFiles,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { LessonsService } from './lessons.service';
@@ -17,6 +18,9 @@ import { STORAGE } from 'src/constants/storage';
 import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('lessons')
 export class LessonsController {
@@ -25,6 +29,8 @@ export class LessonsController {
     private readonly s3Service: S3Service,
   ) {}
   @Post('create/:moduleId')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -66,12 +72,15 @@ export class LessonsController {
   }
 
   @Get('single/:id')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.lessonsService.findOne(id);
   }
 
   @Patch('update/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -108,6 +117,8 @@ export class LessonsController {
   }
 
   @Delete('delete/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
     return await this.lessonsService.remove(id);

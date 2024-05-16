@@ -21,18 +21,11 @@ model Users {
   fullname     String?
   avatar       String?
   refreshToken String?
+  role         UserRole       @default(user)
   Transactions Transactions[]
   MyCourse     MyCourses[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-}
-
-model Admin {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  username  String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 model Courses {
@@ -162,6 +155,11 @@ model Comments {
   isPublished  Boolean  @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+enum UserRole {
+  user
+  admin
 }
 
 enum TransactionStatus {

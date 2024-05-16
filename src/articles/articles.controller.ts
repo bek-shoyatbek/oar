@@ -11,6 +11,7 @@ import {
   Query,
   UploadedFiles,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
@@ -19,7 +20,9 @@ import { Prisma } from '@prisma/client';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from 'src/exception-filters/prisma/prisma.filter';
 import { STORAGE } from '../constants/storage';
-import { info } from 'node:console';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Public } from 'src/decorators/public.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('articles')
 export class ArticlesController {
@@ -29,6 +32,8 @@ export class ArticlesController {
   ) {}
 
   @Post('create')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -84,6 +89,8 @@ export class ArticlesController {
   }
 
   @Patch('update/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseFilters(PrismaClientExceptionFilter)
   @UseInterceptors(
     FileFieldsInterceptor(
@@ -116,7 +123,6 @@ export class ArticlesController {
     const bannerImageMobile =
       files.bannerImageMobile && files.bannerImageMobile[0];
 
-
     if (articleImage) {
       updateArticleDto.articleImage = await this.s3Service.upload(articleImage);
     }
@@ -134,6 +140,7 @@ export class ArticlesController {
   }
 
   @Get('all')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findAll(
     @Query('isPublished', new ParseBoolPipe({ optional: true }))
@@ -143,12 +150,15 @@ export class ArticlesController {
   }
 
   @Get('single/:id')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param('id') id: string) {
     return await this.articlesService.findOne(id);
   }
 
   @Delete('remove/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseFilters(PrismaClientExceptionFilter)
   async remove(@Param('id') id: string) {
     return await this.articlesService.remove(id);

@@ -10,6 +10,7 @@ import {
   Query,
   UploadedFile,
   UseFilters,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
@@ -20,6 +21,9 @@ import { getImageValidator } from 'src/utils/custom-validators/image-validator/i
 import { ValidateObjectIdDto } from './dto/validate-objectId.dto';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/decorators/roles.decorator';
+import { Public } from 'src/decorators/public.decorator';
 
 @Controller('courses')
 export class CoursesController {
@@ -27,8 +31,10 @@ export class CoursesController {
     private readonly coursesService: CoursesService,
     private readonly s3Service: S3Service,
   ) {}
-  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @Post('create')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @UseFilters(PrismaClientExceptionFilter)
   async create(
     @Body() createCourseDto: Prisma.CoursesCreateInput,
@@ -43,8 +49,10 @@ export class CoursesController {
     return await this.coursesService.create(createCourseDto);
   }
 
-  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @Patch('update/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @UseInterceptors(FileInterceptor('image', { storage: STORAGE }))
   @UseFilters(PrismaClientExceptionFilter)
   async update(
     @Param('id') id: string,
@@ -59,6 +67,7 @@ export class CoursesController {
   }
 
   @Get('all')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findAll(
     @Query('status') courseStatus?: 'completed' | 'inProgress' | 'archived',
@@ -67,12 +76,15 @@ export class CoursesController {
   }
 
   @Get('single/:id')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param() params: ValidateObjectIdDto) {
     return await this.coursesService.findOne(params.id);
   }
 
   @Delete('remove/:id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
   @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
     return await this.coursesService.remove(id);
