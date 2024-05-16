@@ -476,14 +476,14 @@ export class PaymeService {
             amount: transaction.amount,
             account: {
               user_id: transaction.userId,
-              plan_id: transaction.planId,
+              planId: transaction.planId,
             },
             create_time: new Date(transaction.createdAt).getTime(),
             perform_time: new Date(transaction.performTime).getTime(),
             cancel_time: new Date(transaction.cancelTime).getTime(),
             transaction: transaction.id,
-            state: this.identifyTransactionState(transaction.status),
-            reason: null,
+            state: transaction.state,
+            reason: transaction.reason || null,
           };
         }),
       },
@@ -506,18 +506,5 @@ export class PaymeService {
       .toJSDate();
 
     return transactionCreatedAt < timeoutThreshold;
-  }
-
-  private identifyTransactionState(string: string) {
-    switch (string) {
-      case 'PENDING':
-        return 1;
-      case 'PAID':
-        return 2;
-      case 'CANCELED':
-        return -2;
-      default:
-        return 0;
-    }
   }
 }
