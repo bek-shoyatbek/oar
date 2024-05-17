@@ -56,22 +56,14 @@ export class LessonsService {
       throw new BadRequestException('Lesson not found');
     }
 
-    console.log('lesson', lesson);
-
     const course = lesson?.module?.course;
 
     const myCourse = await this.prismaService.myCourses.findFirst({
       where: {
         userId: user.userId,
-        courseId: '663ddf9e2b5e5bcecdc6faea',
+        courseId: course.id,
       },
     });
-
-    console.log('myCourse', myCourse);
-
-    if (!myCourse) {
-      throw new BadRequestException('You do not have access to this lesson');
-    }
 
     const hasCourseAccess = myCourse !== undefined;
 
@@ -81,6 +73,24 @@ export class LessonsService {
     if (!hasCourseAccess || hasExpiredAccess) {
       throw new ForbiddenException('You do not have access to this lesson');
     }
+
+    const plan = await this.prismaService.plans.findUnique({
+      where: {
+        id: myCourse?.planId,
+      },
+    });
+
+    if (!plan) {
+      throw new BadRequestException('Plan not found');
+    }
+
+    const hasAttachedFilesEnabled = plan.includeResources;
+
+    if (!hasAttachedFilesEnabled) {
+      delete lesson.attachedFiles;
+    }
+
+    delete lesson.module;
 
     return lesson;
   }
