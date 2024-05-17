@@ -9,7 +9,7 @@ import { ConfirmTransactionDto } from './dto/confirm-transaction.dto';
 import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
-import { error, info, log } from 'console';
+import { error } from 'console';
 
 @Injectable()
 export class UzumService {
@@ -131,7 +131,7 @@ export class UzumService {
         errorCode: ErrorStatusCode.ErrorCheckingPaymentData,
       });
     }
-    log(plan.price, createTransactionDto.amount);
+
     const isValidAmount = plan.price === createTransactionDto.amount / 100; // ! incoming amount is in tiyn
     if (!isValidAmount) {
       error('Invalid amount');
@@ -268,6 +268,7 @@ export class UzumService {
         transId: confirmTransactionDto.transId,
       },
       data: {
+        performTime: new Date(),
         status: 'PAID',
       },
     });
@@ -324,6 +325,7 @@ export class UzumService {
         transId: reverseTransactionDto.transId,
       },
       data: {
+        cancelTime: new Date(),
         status: 'CANCELED',
       },
     });
@@ -364,6 +366,7 @@ export class UzumService {
         errorCode: ErrorStatusCode.AdditionalPaymentPropertyNotFound,
       });
     }
+
     return {
       serviceId: checkTransactionDto.serviceId,
       transId: checkTransactionDto.transId,

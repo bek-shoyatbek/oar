@@ -10,10 +10,6 @@ export class ClickController {
   @Public()
   @HttpCode(HttpStatus.OK)
   async handleMerchantTransactions(@Body() clickReqBody: ClickRequestDto) {
-    console.log('click-up:reqBody', clickReqBody);
-    const result =
-      await this.clickService.handleMerchantTransactions(clickReqBody);
-    console.log('response', result);
-    return result;
+    return await this.clickService.handleMerchantTransactions(clickReqBody);
   }
 }
