@@ -4,6 +4,7 @@ import { UsersController } from './users.controller';
 import { PrismaService } from 'src/prisma.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { S3Service } from 'src/aws/s3/s3.service';
+import { HashingService } from 'src/utils/hashing/hashing.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { S3Service } from 'src/aws/s3/s3.service';
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, PrismaService, S3Service],
+  providers: [UsersService, PrismaService, S3Service, HashingService],
 })
 export class UsersModule {}

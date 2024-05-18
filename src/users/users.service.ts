@@ -1,11 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma, Users } from '@prisma/client';
+import { ObjectId } from 'mongodb';
 
 import { PrismaService } from 'src/prisma.service';
+import { HashingService } from 'src/utils/hashing/hashing.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private hashingService: HashingService,
+  ) {}
   async create(createUserDto: Prisma.UsersCreateInput) {
     const newUser = await this.prisma.users.create({
       data: {
@@ -43,13 +49,26 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: Prisma.UsersUpdateInput) {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await this.hashingService.hashPassword(
+        updateUserDto.password as string,
+      );
+    }
+
+    if (updateUserDto.role) {
+      throw new BadRequestException('You can not change user role');
+    }
+
     const user = await this.prisma.users.update({
       where: {
         id,
       },
       data: {
         ...updateUserDto,
-        role: 'user',
       },
     });
 

@@ -2,10 +2,8 @@ import {
   Controller,
   Body,
   Patch,
-  Param,
   Delete,
   Get,
-  UseGuards,
   Request,
   BadRequestException,
   UseInterceptors,
@@ -13,15 +11,12 @@ import {
   UseFilters,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { Prisma } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { STORAGE } from '../constants/storage';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
-import { Roles } from 'src/decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
