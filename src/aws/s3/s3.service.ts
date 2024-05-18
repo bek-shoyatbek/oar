@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 @Injectable()
 export class S3Service {
   private readonly s3Client: S3Client;
@@ -32,7 +38,20 @@ export class S3Service {
     await this.s3Client.send(new PutObjectCommand(params));
 
     const fileUrl = `${domainName}/${fileName}`;
+
     return fileUrl;
+  }
+
+  async generateSignedUrl(fileURL: string) {
+    const fileKey = fileURL.split('/').pop();
+
+    const command = new GetObjectCommand({
+      Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
+      Key: fileKey,
+    });
+
+    const oneDay = 60 * 60 * 1; // 1 hours
+    return getSignedUrl(this.s3Client, command, { expiresIn: oneDay });
   }
   private getUniqueFilename(originalName: string) {
     const ext = originalName.split('.')[originalName.split('.').length - 1];

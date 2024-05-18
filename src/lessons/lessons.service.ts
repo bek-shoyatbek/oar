@@ -5,11 +5,15 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ObjectId } from 'mongodb';
+import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class LessonsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private s3Service: S3Service,
+  ) {}
 
   async create(moduleId: string, createLessonDto: Prisma.LessonsCreateInput) {
     if (!ObjectId.isValid(moduleId)) {
@@ -97,6 +101,10 @@ export class LessonsService {
     }
 
     delete lesson.module;
+
+    const signedURL = await this.s3Service.generateSignedUrl(lesson.video);
+
+    lesson.video = signedURL;
 
     return lesson;
   }
