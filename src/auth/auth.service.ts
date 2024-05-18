@@ -96,6 +96,9 @@ export class AuthService {
         role: user.role,
       }),
     };
+    await this.userService.update(user.id, {
+      refreshToken: tokens.refreshToken,
+    });
 
     return tokens;
   }
@@ -161,6 +164,10 @@ export class AuthService {
         role: user.role,
       }),
     };
+
+    await this.userService.update(user.id, {
+      refreshToken: tokens.refreshToken,
+    });
 
     return tokens;
   }
