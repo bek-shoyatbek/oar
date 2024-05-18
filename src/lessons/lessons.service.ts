@@ -56,6 +56,12 @@ export class LessonsService {
       throw new BadRequestException('Lesson not found');
     }
 
+    // ! if admin, return lesson
+    if (user.role === 'admin') {
+      delete lesson.module;
+      return lesson;
+    }
+
     const course = lesson?.module?.course;
 
     const myCourse = await this.prismaService.myCourses.findFirst({
