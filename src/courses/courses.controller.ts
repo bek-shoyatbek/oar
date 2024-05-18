@@ -83,6 +83,7 @@ export class CoursesController {
     return await this.coursesService.getMyCourses(userId);
   }
   @Get('single/:id')
+  @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param() params: ValidateObjectIdDto) {
     return await this.coursesService.findOne(params.id);

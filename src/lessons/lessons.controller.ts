@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Request,
   UploadedFiles,
   UseFilters,
   UseGuards,
@@ -73,8 +74,9 @@ export class LessonsController {
 
   @Get('single/:id')
   @UseFilters(PrismaClientExceptionFilter)
-  async findOne(@Param('id') id: string) {
-    return await this.lessonsService.findOne(id);
+  async findOne(@Request() req, @Param('id') id: string) {
+    const user = { userId: req?.user?.userId, role: req?.user?.role };
+    return await this.lessonsService.findOne(id, user);
   }
 
   @Patch('update/:id')
