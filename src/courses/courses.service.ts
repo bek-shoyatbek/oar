@@ -45,6 +45,7 @@ export class CoursesService {
   }
 
   async remove(id: string) {
+    console.log("id",id);
     const course = await this.prismaService.courses.findUnique({
       where: { id },
     });

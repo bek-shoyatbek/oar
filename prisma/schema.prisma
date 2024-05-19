@@ -49,7 +49,7 @@ model Modules {
   titleRu       String?
   descriptionUz String?
   descriptionRu String?
-  course        Courses   @relation(fields: [courseId], references: [id])
+  course        Courses   @relation(fields: [courseId], references: [id],onDelete:Cascade)
   courseId      String    @db.ObjectId
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -64,7 +64,7 @@ model Lessons {
   descriptionUz String?
   descriptionRu String?
   attachedFiles String[] @default([])
-  module        Modules  @relation(fields: [moduleId], references: [id])
+  module        Modules  @relation(fields: [moduleId], references: [id],onDelete:Cascade)
   moduleId      String   @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
