@@ -8,19 +8,25 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install --production
+RUN npm install
 
 # Copy the entire project
 COPY . .
-COPY ./prisma ./prisma
 
-RUN npx prisma generate --schema=./prisma/schema.prisma
+ARG DATABASE_URL
 
-# Build the NestJS application
-RUN npm run build
+# Set the environment variables
+ENV DATABASE_URL=$DATABASE_URL
+
 
 # Expose the port the app will run on
 EXPOSE 4400
+
+RUN cd /app && npx prisma db push && npx prisma generate 
+
+RUN npm i @nestjs/cli -g 
+
+RUN npm run build
 
 # Start the NestJS application
 CMD ["npm", "run", "start:prod"]
