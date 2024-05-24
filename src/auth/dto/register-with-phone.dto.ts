@@ -8,4 +8,9 @@ export class RegisterWithPhoneDto {
   @IsNotEmpty({ message: 'Password is required' })
   @IsStrongPassword(PASSWORD_OPTIONS)
   password: string;
+
+  @IsNotEmpty({ message: 'Name is required' })
+  name: string;
+  @IsNotEmpty({ message: 'Surname is required' })
+  surname: string;
 }
