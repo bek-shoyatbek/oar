@@ -18,7 +18,8 @@ model Users {
   email        String?
   phone        String?
   password     String
-  fullname     String?
+  name         String?
+  surname      String?
   avatar       String?
   refreshToken String?
   role         UserRole       @default(user)
@@ -49,7 +50,7 @@ model Modules {
   titleRu       String?
   descriptionUz String?
   descriptionRu String?
-  course        Courses   @relation(fields: [courseId], references: [id],onDelete:Cascade)
+  course        Courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId      String    @db.ObjectId
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -64,7 +65,7 @@ model Lessons {
   descriptionUz String?
   descriptionRu String?
   attachedFiles String[] @default([])
-  module        Modules  @relation(fields: [moduleId], references: [id],onDelete:Cascade)
+  module        Modules  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   moduleId      String   @db.ObjectId
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
