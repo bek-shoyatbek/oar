@@ -63,7 +63,8 @@ export class LessonsService {
     // ! if admin, return lesson
     if (user.role === 'admin') {
       delete lesson.module;
-      return lesson;
+      const signedURL = await this.s3Service.generateSignedUrl(lesson.video);
+      return { ...lesson, signedURL };
     }
 
     const course = lesson?.module?.course;

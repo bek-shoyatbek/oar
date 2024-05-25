@@ -1,12 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
+import { getSignedUrl } from '@aws-sdk/cloudfront-signer';
 @Injectable()
 export class S3Service {
   private readonly s3Client: S3Client;
@@ -25,9 +20,7 @@ export class S3Service {
   async upload(file: Express.Multer.File) {
     const fileName = this.getUniqueFilename(file.originalname);
 
-    const domainName = this.configService.get<string>(
-      'AWS_CLOUDFRONT_DOMAIN_NAME',
-    );
+    const domainName = this.configService.get<string>('AWS_CF_DOMAIN');
     const bucketName = this.configService.get<string>('AWS_BUCKET_NAME');
     const params = {
       Bucket: bucketName,
@@ -43,15 +36,22 @@ export class S3Service {
   }
 
   async generateSignedUrl(fileURL: string) {
+    const domainName = this.configService.get<string>('AWS_CF_DOMAIN');
+    const privateKey = this.configService.get<string>('AWS_CF_PRIVATE_KEY');
+    const keypairId = this.configService.get<string>('AWS_CF_KEYPAIR_ID');
+
     const fileKey = fileURL.split('/').pop();
 
-    const command = new GetObjectCommand({
-      Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
-      Key: fileKey,
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 1); // 1 hours
+
+    const signedUrl = getSignedUrl({
+      url: `https://${domainName}/${fileKey}`,
+      dateLessThan: expires.toISOString(),
+      privateKey,
+      keyPairId: keypairId,
     });
 
-    const oneDay = 60 * 60 * 1; // 1 hours
-    return getSignedUrl(this.s3Client, command, { expiresIn: oneDay });
+    return signedUrl;
   }
   private getUniqueFilename(originalName: string) {
     const ext = originalName.split('.')[originalName.split('.').length - 1];

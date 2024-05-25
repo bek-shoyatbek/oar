@@ -21,7 +21,6 @@ import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorator';
-import { Public } from 'src/decorators/public.decorator';
 
 @Controller('lessons')
 export class LessonsController {
