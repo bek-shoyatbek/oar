@@ -8,7 +8,7 @@ const port = process.env.PORT || 3000;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('v1');
+  app.setGlobalPrefix('api/v1');
 
   app.use(morgan('dev'));
 
