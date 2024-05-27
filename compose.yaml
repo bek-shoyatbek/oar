@@ -19,6 +19,12 @@ services:
     depends_on:
       - redis
 
+  nextjs-app:
+    image: bekshoyatbekov/nextjs-app:1.0.6
+    ports:
+      - '3000:3000'
+    volumes:
+      - nextjs-data:/data
   redis:
     image: redis:latest
     ports:
@@ -27,4 +33,5 @@ services:
       - redis-data:/data
 
 volumes:
+  nextjs-data:
   redis-data:

@@ -43,7 +43,7 @@ export class PaymeBasicAuthGuard implements CanActivate {
       const isValidUsername =
         this.configService.get<string>('PAYME_LOGIN') === username;
       const isValidPassword =
-        this.configService.get<string>('PAYME_PASSWORD_TEST') === password;
+        this.configService.get<string>('PAYME_PASSWORD') === password;
 
       if (!isValidUsername || !isValidPassword) {
         response.status(200).send({
