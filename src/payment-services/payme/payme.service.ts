@@ -118,6 +118,7 @@ export class PaymeService {
     const planId = createTransactionDto.params?.account?.planId;
     const userId = createTransactionDto.params?.account?.user_id;
     const transId = createTransactionDto.params?.id;
+    const amount = createTransactionDto.params?.amount;
 
     const plan = await this.prismaService.plans.findUnique({
       where: {
@@ -194,7 +195,7 @@ export class PaymeService {
     const checkTransaction: CheckPerformTransactionDto = {
       method: TransactionMethods.CheckPerformTransaction,
       params: {
-        amount: plan.price,
+        amount: amount,
         account: {
           planId,
           user_id: userId,
