@@ -11,22 +11,32 @@ export class CoursesService {
   }
 
   async findAll(courseStatus?: 'completed' | 'inProgress' | 'archived') {
-    return await this.prismaService.courses.findMany({
+    const courses = await this.prismaService.courses.findMany({
       where: courseStatus ? { courseStatus: courseStatus } : {},
     });
+
+    return courses;
   }
 
   async findOne(id: string) {
-    return await this.prismaService.courses.findUnique({
+    const course = await this.prismaService.courses.findUnique({
       where: { id },
       include: { Module: true },
     });
+
+    if (!course) {
+      throw new BadRequestException('Course not found');
+    }
+
+    return course;
   }
 
   async getMyCourses(userId: string) {
-    return await this.prismaService.myCourses.findMany({
+    const myCourses = await this.prismaService.myCourses.findMany({
       where: { userId },
     });
+
+    return myCourses;
   }
 
   async update(id: string, updateCourseDto: Prisma.CoursesUpdateInput) {
@@ -45,7 +55,6 @@ export class CoursesService {
   }
 
   async remove(id: string) {
-    console.log("id",id);
     const course = await this.prismaService.courses.findUnique({
       where: { id },
     });

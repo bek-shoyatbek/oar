@@ -1,5 +1,6 @@
-import { Injectable, ParseBoolPipe } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -13,15 +14,18 @@ export class BannersService {
   }
 
   async findAll(isPublished: boolean) {
-    return await this.prismaService.banners.findMany({
+    const banners = await this.prismaService.banners.findMany({
       where: { isPublished },
     });
+
+    return banners;
   }
 
   async findOne(id: string) {
-    return await this.prismaService.banners.findUnique({
+    const banner = await this.prismaService.banners.findUnique({
       where: { id },
     });
+    return banner;
   }
 
   async update(id: string, updateBannerDto: Prisma.BannersUpdateInput) {

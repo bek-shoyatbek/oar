@@ -38,12 +38,18 @@ export class ModulesService {
     if (!ObjectId.isValid(id)) {
       throw new BadRequestException('Invalid module id');
     }
-    return await this.prismaService.modules.findUnique({
+    const module = await this.prismaService.modules.findUnique({
       where: { id },
       include: {
         Lesson: true,
       },
     });
+
+    if (!module) {
+      throw new BadRequestException('Module not found');
+    }
+
+    return module;
   }
   async update(id: string, updateModuleDto: Prisma.ModulesUpdateInput) {
     if (!ObjectId.isValid(id)) {

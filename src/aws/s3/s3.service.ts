@@ -36,16 +36,16 @@ export class S3Service {
   }
 
   async generateSignedUrl(fileURL: string) {
-    const domainName = this.configService.get<string>('AWS_CF_DOMAIN');
+    const domainName = this.configService.get<string>('AWS_CF_DOMAIN_PRIVATE');
     const privateKey = this.configService.get<string>('AWS_CF_PRIVATE_KEY');
     const keypairId = this.configService.get<string>('AWS_CF_KEYPAIR_ID');
 
     const fileKey = fileURL.split('/').pop();
 
-    const expires = new Date(Date.now() + 1000 * 60 * 60 * 1); // 1 hours
+    const expires = new Date(Date.now() + 1000 * 60 * 60 * 1); // EXPIRES IN 1 HOUR
 
     const signedUrl = getSignedUrl({
-      url: `https://${domainName}/${fileKey}`,
+      url: `${domainName}/${fileKey}`,
       dateLessThan: expires.toISOString(),
       privateKey,
       keyPairId: keypairId,
