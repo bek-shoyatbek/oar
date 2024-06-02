@@ -16,13 +16,15 @@ services:
       - '4400:4400'
     env_file:
       - .env
+    restart: always
     depends_on:
       - redis
 
   nextjs-app:
-    image: bekshoyatbekov/nextjs-app:1.0.6
+    image: bekshoyatbekov/nextjs-app:1.0.9
     ports:
       - '3000:3000'
+    restart: always
     volumes:
       - nextjs-data:/data
   redis:
