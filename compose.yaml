@@ -1,9 +1,9 @@
 services:
-  app:
-    image: bekshoyatbekov/ganya-api:1.0.0
+  nestjs-api:
     container_name: API
     build:
       context: .
+      dockerfile: Dockerfile
       args:
         - DATABASE_URL=${DATABASE_URL}
         - PORT=${PORT}
@@ -24,7 +24,7 @@ services:
     volumes:
       - nextjs-data:/data
     depends_on:
-      - app
+      - nestjs-api
   redis:
     container_name: redis-cache
     image: redis:latest
