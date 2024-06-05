@@ -60,6 +60,8 @@ export class PaymeService {
 
     const userId = checkPerformTransactionDto.params?.account?.user_id;
 
+    const amount = checkPerformTransactionDto.params?.amount / 100; // comes in tiyn and needs to be in sum
+
     const plan = await this.prismaService.plans.findUnique({
       where: {
         id: planId,
@@ -86,7 +88,7 @@ export class PaymeService {
       };
     }
 
-    if (plan.price !== checkPerformTransactionDto.params.amount) {
+    if (plan.price !== amount) {
       return {
         error: {
           code: ErrorStatusCodes.InvalidAmount,
