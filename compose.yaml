@@ -1,31 +1,32 @@
 services:
-  app:
+  nestjs-api:
+    container_name: API
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - DATABASE_URL=${DATABASE_URL}
         - PORT=${PORT}
-    command:
-      [
-        sh,
-        -c,
-        "cd /app && echo $DATABASE_URL && npx prisma db push && npx prisma generate&& npm i @nestjs/cli && npm run build && npm run start:prod"
-      ]
     ports:
       - '4400:4400'
     env_file:
       - .env
+    restart: always
     depends_on:
       - redis
 
   nextjs-app:
-    image: bekshoyatbekov/nextjs-app:1.0.6
+    container_name: UI
+    image: bekshoyatbekov/nextjs-app:1.0.9
     ports:
       - '3000:3000'
+    restart: always
     volumes:
       - nextjs-data:/data
+    depends_on:
+      - nestjs-api
   redis:
+    container_name: redis-cache
     image: redis:latest
     ports:
       - '6379:6379'
