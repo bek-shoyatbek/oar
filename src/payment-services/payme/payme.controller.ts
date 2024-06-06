@@ -20,6 +20,9 @@ export class PaymeController {
   @UseGuards(PaymeBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async handleTransactionMethods(@Body() reqBody: RequestBody) {
-    return await this.paymeService.handleTransactionMethods(reqBody);
+    console.log('payme reqBody', reqBody);
+    const response = await this.paymeService.handleTransactionMethods(reqBody);
+    console.log('response', response);
+    return response;
   }
 }
