@@ -36,6 +36,18 @@ export class CoursesService {
       where: { userId },
     });
 
+    if (!myCourses) {
+      throw new BadRequestException('Course not found');
+    }
+
+    for (const myCourse of myCourses) {
+      const course = await this.prismaService.courses.findUnique({
+        where: { id: myCourse.courseId },
+      });
+
+      myCourse['course'] = course;
+    }
+
     return myCourses;
   }
 
