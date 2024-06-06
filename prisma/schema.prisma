@@ -94,6 +94,10 @@ model Plans {
   id               String         @id @default(auto()) @map("_id") @db.ObjectId
   titleUz          String
   titleRu          String
+  detailsUz        String
+  detailsRu        String
+  descriptionUz    String
+  descriptionRu    String
   availablePeriod  Int // ! In days
   includeResources Boolean        @default(false)
   includeSupport   Boolean        @default(false)
