@@ -23,6 +23,69 @@ export class UsersService {
     return this.exclude(newUser, 'password');
   }
 
+  async findAll() {
+    const users = await this.prisma.users.findMany();
+
+    return users.map((user) => {
+      this.exclude(user, 'password');
+      this.exclude(user, 'refreshToken');
+      return user;
+    });
+  }
+
+  async findOne(id: string) {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user id');
+    }
+    const user = await this.prisma.users.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        MyCourse: true,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    this.exclude(user, 'refreshToken');
+
+    const courses = await this.prisma.courses.findMany({
+      where: {
+        id: {
+          in: user.MyCourse.map((myCourse) => myCourse.courseId),
+        },
+      },
+    });
+
+    const plans = await this.prisma.plans.findMany({
+      where: {
+        id: {
+          in: user.MyCourse.map((myCourse) => myCourse.planId),
+        },
+      },
+    });
+
+    courses?.map((course) => {
+      plans?.map((plan) => {
+        if (course.id === plan.courseId) {
+          course['plan'] = plan;
+        }
+      });
+    });
+
+    this.exclude(user, 'MyCourse');
+
+    const response = {
+      user: this.exclude(user, 'password'),
+      courses,
+    };
+
+    return response;
+  }
+
   async findOneByEmail(email: string) {
     return await this.prisma.users.findFirst({
       where: {
