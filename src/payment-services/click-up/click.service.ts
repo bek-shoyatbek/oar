@@ -43,7 +43,7 @@ export class ClickService {
 
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
-    const amount = clickReqBody.amount;
+    const amount = parseInt(`${clickReqBody.amount}`);
     const transId = clickReqBody.click_trans_id + ''; // ! in db transId is string
 
     const md5Hash = this.hashingService.md5(
@@ -128,7 +128,11 @@ export class ClickService {
       };
     }
 
-    if (parseInt(`${amount}`) !== plan.price) {
+    const discount = plan?.discount;
+    const discountExpiredAt = plan?.discountExpiredAt;
+    const hasDiscount = discount && discountExpiredAt > new Date();
+
+    if (amount !== plan.price || (hasDiscount && discount !== amount)) {
       console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
@@ -187,7 +191,7 @@ export class ClickService {
     const prepareId = clickReqBody.merchant_prepare_id;
     const transId = clickReqBody.click_trans_id;
     const serviceId = clickReqBody.service_id;
-    const amount = clickReqBody.amount;
+    const amount = parseInt(`${clickReqBody.amount}`);
     const signTime = clickReqBody.sign_time;
     const error = clickReqBody.error;
 
@@ -274,7 +278,12 @@ export class ClickService {
       };
     }
 
-    if (parseInt(`${amount}`) !== plan.price) {
+    const discount = plan?.discount;
+    const discountExpiredAt = plan?.discountExpiredAt;
+    const hasDiscount = discount && discountExpiredAt > new Date();
+
+    if (amount !== plan.price || (hasDiscount && discount !== amount)) {
+      console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
         error_note: 'Invalid amount',
