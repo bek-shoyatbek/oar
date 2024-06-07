@@ -134,12 +134,17 @@ export class ClickService {
       discountExpiredAt && new Date() <= discountExpiredAt;
 
     let expectedAmount: number;
+    console.log('isDiscountValid', isDiscountValid);
 
     if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
       expectedAmount = discount;
     } else {
-      expectedAmount = plan.price;
+      console.log('amount', amount);
+      expectedAmount = amount;
     }
+
+    console.log('expectedAmount', expectedAmount);
 
     if (amount !== expectedAmount) {
       console.error('Invalid amount');
