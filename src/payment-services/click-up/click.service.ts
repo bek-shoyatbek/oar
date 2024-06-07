@@ -278,17 +278,28 @@ export class ClickService {
       };
     }
 
-    const discount = plan?.discount;
+    const discount = plan?.discount || 0;
     const discountExpiredAt = plan?.discountExpiredAt;
-    const hasDiscount = discount && discountExpiredAt > new Date();
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+    const hasValidDiscount = isDiscountValid && discount > 0;
 
-    if (amount !== plan.price || (hasDiscount && discount !== amount)) {
+    if (amount !== plan.price && !hasValidDiscount) {
       console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
         error_note: 'Invalid amount',
       };
     }
+
+    if (hasValidDiscount && amount !== discount) {
+      console.error('Invalid amount for discount');
+      return {
+        error: ClickError.InvalidAmount,
+        error_note: 'Invalid amount for discount',
+      };
+    }
+
 
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
