@@ -31,9 +31,21 @@ export class PlansService {
   }
 
   async findAll(courseId: string) {
-    return await this.prismaService.plans.findMany({
+    const plans = await this.prismaService.plans.findMany({
       where: { courseId: { equals: courseId } },
     });
+
+    plans?.map((plan) => {
+      const expiredDate = new Date(plan?.discountExpiredAt);
+      if (!plan?.discount || expiredDate < new Date()) {
+        delete plan.discount;
+        delete plan.discountExpiredAt;
+      }
+
+      return plan;
+    });
+
+    return plans;
   }
 
   transformData(data: any) {

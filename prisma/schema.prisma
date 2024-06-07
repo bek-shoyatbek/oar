@@ -58,17 +58,18 @@ model Modules {
 }
 
 model Lessons {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  titleUz       String?
-  titleRu       String?
-  video         String
-  descriptionUz String?
-  descriptionRu String?
-  attachedFiles String[] @default([])
-  module        Modules  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  moduleId      String   @db.ObjectId
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  titleUz          String?
+  titleRu          String?
+  video            String
+  descriptionUz    String?
+  descriptionRu    String?
+  privateGroupLink String?
+  attachedFiles    String[] @default([])
+  module           Modules  @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId         String   @db.ObjectId
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Transactions {
@@ -91,22 +92,25 @@ model Transactions {
 }
 
 model Plans {
-  id               String         @id @default(auto()) @map("_id") @db.ObjectId
-  titleUz          String
-  titleRu          String
-  detailsUz        String?
-  detailsRu        String?
-  descriptionUz    String?
-  descriptionRu    String?
-  availablePeriod  Int // ! In days
-  includeResources Boolean        @default(false)
-  includeSupport   Boolean        @default(false)
-  price            Float
-  courseId         String         @db.ObjectId
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  Transactions     Transactions[]
-  MyCourses        MyCourses[]
+  id                        String         @id @default(auto()) @map("_id") @db.ObjectId
+  titleUz                   String
+  titleRu                   String
+  detailsUz                 String?
+  detailsRu                 String?
+  descriptionUz             String?
+  descriptionRu             String?
+  availablePeriod           Int // ! In days
+  discount                  Float?
+  discountExpiredAt         DateTime?
+  includePrivateGroupAccess Boolean?
+  includeResources          Boolean        @default(false)
+  includeSupport            Boolean        @default(false)
+  price                     Float
+  courseId                  String         @db.ObjectId
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+  Transactions              Transactions[]
+  MyCourses                 MyCourses[]
 }
 
 model MyCourses {
