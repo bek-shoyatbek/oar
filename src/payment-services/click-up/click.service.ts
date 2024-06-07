@@ -128,11 +128,20 @@ export class ClickService {
       };
     }
 
-    const discount = plan?.discount;
+    const discount = plan?.discount || 0;
     const discountExpiredAt = plan?.discountExpiredAt;
-    const hasDiscount = discount && discountExpiredAt > new Date();
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
 
-    if (amount !== plan.price || (hasDiscount && discount !== amount)) {
+    let expectedAmount: number;
+
+    if (isDiscountValid && discount > 0) {
+      expectedAmount = discount;
+    } else {
+      expectedAmount = plan.price;
+    }
+
+    if (amount !== expectedAmount) {
       console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
