@@ -129,9 +129,9 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const discountExpiredAt = new Date(plan?.discountExpiredAt).toISOString();
     const isDiscountValid =
-      discountExpiredAt && new Date() <= discountExpiredAt;
+      discountExpiredAt && new Date().toISOString() <= discountExpiredAt;
 
     let expectedAmount: number;
     console.log('isDiscountValid', isDiscountValid);
@@ -293,17 +293,22 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const discountExpiredAt = new Date(plan?.discountExpiredAt).toISOString();
     const isDiscountValid =
-      discountExpiredAt && new Date() <= discountExpiredAt;
+      discountExpiredAt && new Date().toISOString() <= discountExpiredAt;
 
     let expectedAmount: number;
+    console.log('isDiscountValid', isDiscountValid);
 
     if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
       expectedAmount = discount;
     } else {
-      expectedAmount = plan.price;
+      console.log('amount', amount);
+      expectedAmount = amount;
     }
+
+    console.log('expectedAmount', expectedAmount);
 
     if (amount !== expectedAmount) {
       console.error('Invalid amount');
@@ -312,7 +317,6 @@ export class ClickService {
         error_note: 'Invalid amount',
       };
     }
-
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: `${transId}`,
