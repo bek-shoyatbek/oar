@@ -129,7 +129,7 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = plan?.discountExpiredAt;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
     const isDiscountValid =
       discountExpiredAt && new Date() <= discountExpiredAt;
 
@@ -293,7 +293,7 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = plan?.discountExpiredAt;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
     const isDiscountValid =
       discountExpiredAt && new Date() <= discountExpiredAt;
 
