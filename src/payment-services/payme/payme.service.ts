@@ -311,6 +311,21 @@ export class PaymeService {
       },
     });
 
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId: transaction.userId,
+        planId: transaction.planId,
+      },
+    });
+
+    if (myCourse) {
+      return {
+        error: PaymeError.CantDoOperation,
+        id: performTransactionDto.params.id,
+      };
+    }
+
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
     await this.prismaService.myCourses.create({

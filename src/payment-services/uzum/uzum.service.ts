@@ -252,6 +252,25 @@ export class UzumService {
       },
     });
 
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId: transaction.userId,
+        planId: transaction.planId,
+      },
+    });
+
+    if (myCourse) {
+      error('Payment already processed');
+      throw new BadRequestException({
+        serviceId: confirmTransactionDto.serviceId,
+        transId: confirmTransactionDto.transId,
+        status: ResponseStatus.Failed,
+        confirmTime: new Date().valueOf(),
+        errorCode: ErrorStatusCode.PaymentAlreadyProcessed,
+      });
+    }
+
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
     await this.prismaService.myCourses.create({

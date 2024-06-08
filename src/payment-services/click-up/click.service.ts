@@ -129,9 +129,9 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = new Date(plan?.discountExpiredAt).toISOString();
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
     const isDiscountValid =
-      discountExpiredAt && new Date().toISOString() <= discountExpiredAt;
+      discountExpiredAt && new Date() <= discountExpiredAt;
 
     let expectedAmount: number;
     console.log('isDiscountValid', isDiscountValid);
@@ -293,9 +293,9 @@ export class ClickService {
     }
 
     const discount = plan?.discount || 0;
-    const discountExpiredAt = new Date(plan?.discountExpiredAt).toISOString();
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
     const isDiscountValid =
-      discountExpiredAt && new Date().toISOString() <= discountExpiredAt;
+      discountExpiredAt && new Date() <= discountExpiredAt;
 
     let expectedAmount: number;
     console.log('isDiscountValid', isDiscountValid);
@@ -317,6 +317,7 @@ export class ClickService {
         error_note: 'Invalid amount',
       };
     }
+
     const transaction = await this.prismaService.transactions.findUnique({
       where: {
         transId: `${transId}`,
@@ -354,6 +355,21 @@ export class ClickService {
         status: 'PAID',
       },
     });
+
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId,
+        planId,
+      },
+    });
+
+    if (myCourse) {
+      return {
+        error: ClickError.AlreadyPaid,
+        error_note: 'Already bought',
+      };
+    }
 
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
