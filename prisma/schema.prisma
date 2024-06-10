@@ -120,7 +120,7 @@ model MyCourses {
   planId         String    @db.ObjectId
   plan           Plans     @relation(fields: [planId], references: [id])
   user           Users     @relation(fields: [userId], references: [id])
-  userId         String    @unique @db.ObjectId
+  userId         String    @db.ObjectId
   purchaseDate   DateTime  @default(now())
   expirationDate DateTime
   Courses        Courses[]
