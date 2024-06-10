@@ -63,8 +63,8 @@ export class LessonsService {
     // ! if admin, return lesson
     if (user.role === 'admin') {
       delete lesson.module;
-      const signedURL = await this.s3Service.generateSignedUrl(lesson.video);
-      return { ...lesson, signedURL };
+
+      return lesson;
     }
 
     const course = lesson?.module?.course;
@@ -103,9 +103,15 @@ export class LessonsService {
 
     delete lesson.module;
 
-    const signedURL = await this.s3Service.generateSignedUrl(lesson.video);
+    if (lesson.videoUz) {
+      const signedURL = await this.s3Service.generateSignedUrl(lesson.videoUz);
+      lesson.videoUz = signedURL;
+    }
 
-    lesson.video = signedURL;
+    if (lesson.videoRu) {
+      const signedURL = await this.s3Service.generateSignedUrl(lesson.videoRu);
+      lesson.videoRu = signedURL;
+    }
 
     return lesson;
   }
