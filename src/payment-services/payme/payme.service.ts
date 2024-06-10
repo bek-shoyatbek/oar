@@ -96,7 +96,7 @@ export class PaymeService {
       discountExpiredAt && new Date() <= discountExpiredAt;
 
     let expectedAmount: number;
-    console.log('isDiscountValid', isDiscountValid);
+    console.log('isDiscountValid ', isDiscountValid);
 
     if (isDiscountValid && discount > 0) {
       console.log('discount', discount);
