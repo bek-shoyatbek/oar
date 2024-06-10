@@ -360,6 +360,7 @@ export class ClickService {
     const myCourse = await this.prismaService.myCourses.findFirst({
       where: {
         userId,
+        planId,
       },
     });
 
