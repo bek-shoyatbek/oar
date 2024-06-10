@@ -360,9 +360,10 @@ export class ClickService {
     const myCourse = await this.prismaService.myCourses.findFirst({
       where: {
         userId,
-        planId,
       },
     });
+
+    console.log('myCourse', myCourse);
 
     if (myCourse) {
       return {
@@ -372,19 +373,13 @@ export class ClickService {
     }
 
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
-
-    console.table({
-      userId,
-      courseId: plan.courseId,
-      planId,
-      expirationDate,
-    });
+    
     // create my course
     await this.prismaService.myCourses.create({
       data: {
-        userId,
+        userId: user.id,
         courseId: plan.courseId,
-        planId,
+        planId: plan.id,
         expirationDate,
       },
     });
