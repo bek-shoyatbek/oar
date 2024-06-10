@@ -364,8 +364,6 @@ export class ClickService {
       },
     });
 
-    console.log('myCourse', myCourse);
-
     if (myCourse) {
       return {
         error: ClickError.AlreadyPaid,
@@ -376,7 +374,7 @@ export class ClickService {
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
     // create my course
-    const myNewCourse = await this.prismaService.myCourses.create({
+    await this.prismaService.myCourses.create({
       data: {
         userId: user.id,
         courseId: plan.courseId,
@@ -384,8 +382,6 @@ export class ClickService {
         expirationDate,
       },
     });
-
-    console.log('myNewCourse', myNewCourse);
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,
