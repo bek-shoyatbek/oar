@@ -72,7 +72,7 @@ export class UzumService {
   }
 
   async create(createTransactionDto: CreateTransactionDto) {
-    const amount = createTransactionDto.params.amount / 100; // ! amount is in tiyns
+    const amount = parseInt(`${createTransactionDto.params.amount}`) / 100; // ! amount is in tiyns
     const isValidServiceId = this.checkServiceId(
       createTransactionDto.serviceId,
     );
