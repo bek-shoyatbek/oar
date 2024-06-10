@@ -89,6 +89,7 @@ export class PaymeService {
       };
     }
 
+    const actualPrice = plan.price;
     const discount = plan?.discount || 0;
     const discountExpiredAt = new Date(plan?.discountExpiredAt);
     const isDiscountValid =
@@ -102,7 +103,7 @@ export class PaymeService {
       expectedAmount = discount;
     } else {
       console.log('amount', amount);
-      expectedAmount = amount;
+      expectedAmount = actualPrice;
     }
 
     console.log('expectedAmount', expectedAmount);
