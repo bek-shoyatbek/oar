@@ -13,6 +13,7 @@ import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { PaymeError } from './constants/payme-error';
 import { DateTime } from 'luxon';
 import { CancelingReasons } from './constants/canceling-reasons';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymeService {
@@ -412,11 +413,13 @@ export class PaymeService {
       };
     }
 
+    const deleteUniqueInputs = {
+      userId: transaction.userId,
+      planId: transaction.planId,
+    } as Prisma.MyCoursesWhereUniqueInput;
+
     await this.prismaService.myCourses.delete({
-      where: {
-        userId: transaction.userId,
-        planId: transaction.planId,
-      },
+      where: deleteUniqueInputs,
     });
 
     const updatedTransaction = await this.prismaService.transactions.update({

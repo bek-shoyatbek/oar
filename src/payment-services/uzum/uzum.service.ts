@@ -10,6 +10,7 @@ import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
 import { error } from 'console';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UzumService {
@@ -332,11 +333,13 @@ export class UzumService {
       });
     }
 
+    const deleteUniqueInputs = {
+      userId: transaction.userId,
+      planId: transaction.planId,
+    } as Prisma.MyCoursesWhereUniqueInput;
+
     await this.prismaService.myCourses.delete({
-      where: {
-        userId: transaction.userId,
-        planId: transaction.planId,
-      },
+      where: deleteUniqueInputs,
     });
 
     await this.prismaService.transactions.update({
