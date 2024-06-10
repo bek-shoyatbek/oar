@@ -61,7 +61,8 @@ model Lessons {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   titleUz          String?
   titleRu          String?
-  video            String
+  videoUz          String?
+  videoRu          String?
   descriptionUz    String?
   descriptionRu    String?
   privateGroupLink String?

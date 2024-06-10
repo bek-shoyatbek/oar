@@ -373,6 +373,13 @@ export class ClickService {
 
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
+    console.table({
+      userId,
+      courseId: plan.courseId,
+      planId,
+      expirationDate,
+    });
+    // create my course
     await this.prismaService.myCourses.create({
       data: {
         userId,
