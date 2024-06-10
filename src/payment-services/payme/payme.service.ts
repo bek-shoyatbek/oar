@@ -89,19 +89,31 @@ export class PaymeService {
       };
     }
 
-    if (plan.price !== amount) {
+    const discount = plan?.discount || 0;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+
+    let expectedAmount: number;
+    console.log('isDiscountValid', isDiscountValid);
+
+    if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
+      expectedAmount = discount;
+    } else {
+      console.log('amount', amount);
+      expectedAmount = amount;
+    }
+
+    console.log('expectedAmount', expectedAmount);
+
+    if (amount !== expectedAmount) {
+      console.error('Invalid amount');
       return {
-        error: {
-          code: ErrorStatusCodes.InvalidAmount,
-          message: {
-            uz: 'Noto`g`ri summa',
-            en: 'Invalid amount',
-            ru: 'Недопустимая сумма',
-          },
-          data: null,
-        },
+        error: PaymeError.InvalidAmount,
       };
     }
+
     return {
       result: {
         allow: true,
@@ -316,7 +328,7 @@ export class PaymeService {
     const myCourse = await this.prismaService.myCourses.findFirst({
       where: {
         userId: transaction.userId,
-        planId: transaction.planId,
+        planId: plan.id,
       },
     });
 
@@ -329,11 +341,12 @@ export class PaymeService {
 
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
+    // create my course
     await this.prismaService.myCourses.create({
       data: {
         userId: transaction.userId,
         courseId: plan.courseId,
-        planId: transaction.planId,
+        planId: plan.id,
         expirationDate,
       },
     });
