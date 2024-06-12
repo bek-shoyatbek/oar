@@ -10,6 +10,7 @@ import { ReverseTransactionDto } from './dto/reverse-transaction.dto';
 import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
 import { error } from 'console';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UzumService {
@@ -71,6 +72,7 @@ export class UzumService {
   }
 
   async create(createTransactionDto: CreateTransactionDto) {
+    const amount = createTransactionDto.amount / 100; // ! amount is in tiyns
     const isValidServiceId = this.checkServiceId(
       createTransactionDto.serviceId,
     );
@@ -132,8 +134,26 @@ export class UzumService {
       });
     }
 
-    const isValidAmount = plan.price === createTransactionDto.amount / 100; // ! incoming amount is in tiyn
-    if (!isValidAmount) {
+    const actualPrice = plan.price;
+    const discount = plan?.discount || 0;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+
+    let expectedAmount: number;
+    console.log('isDiscountValid ', isDiscountValid);
+
+    if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
+      expectedAmount = discount;
+    } else {
+      console.log('amount', amount);
+      expectedAmount = actualPrice;
+    }
+
+    console.log('expectedAmount', expectedAmount);
+
+    if (amount !== expectedAmount) {
       error('Invalid amount');
       throw new BadRequestException({
         serviceId: createTransactionDto.serviceId,
@@ -252,13 +272,33 @@ export class UzumService {
       },
     });
 
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId: transaction.userId,
+        planId: plan.id,
+      },
+    });
+
+    if (myCourse) {
+      error('User already bought this course');
+      throw new BadRequestException({
+        serviceId: confirmTransactionDto.serviceId,
+        transId: confirmTransactionDto.transId,
+        status: ResponseStatus.Failed,
+        confirmTime: new Date().valueOf(),
+        errorCode: ErrorStatusCode.PaymentAlreadyProcessed,
+      });
+    }
+
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
+    // create my course
     await this.prismaService.myCourses.create({
       data: {
-        userId,
+        userId: transaction.userId,
         courseId: plan.courseId,
-        planId,
+        planId: plan.id,
         expirationDate,
       },
     });
@@ -313,11 +353,13 @@ export class UzumService {
       });
     }
 
+    const deleteUniqueInputs = {
+      userId: transaction.userId,
+      planId: transaction.planId,
+    } as Prisma.MyCoursesWhereUniqueInput;
+
     await this.prismaService.myCourses.delete({
-      where: {
-        userId: transaction.userId,
-        planId: transaction.planId,
-      },
+      where: deleteUniqueInputs,
     });
 
     await this.prismaService.transactions.update({

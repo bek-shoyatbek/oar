@@ -13,6 +13,7 @@ import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { PaymeError } from './constants/payme-error';
 import { DateTime } from 'luxon';
 import { CancelingReasons } from './constants/canceling-reasons';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PaymeService {
@@ -60,6 +61,8 @@ export class PaymeService {
 
     const userId = checkPerformTransactionDto.params?.account?.user_id;
 
+    const amount = checkPerformTransactionDto.params?.amount / 100; // comes in tiyn and needs to be in sum
+
     const plan = await this.prismaService.plans.findUnique({
       where: {
         id: planId,
@@ -86,19 +89,32 @@ export class PaymeService {
       };
     }
 
-    if (plan.price !== checkPerformTransactionDto.params.amount) {
+    const actualPrice = plan.price;
+    const discount = plan?.discount || 0;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+
+    let expectedAmount: number;
+    console.log('isDiscountValid ', isDiscountValid);
+
+    if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
+      expectedAmount = discount;
+    } else {
+      console.log('amount', amount);
+      expectedAmount = actualPrice;
+    }
+
+    console.log('expectedAmount', expectedAmount);
+
+    if (amount !== expectedAmount) {
+      console.error('Invalid amount');
       return {
-        error: {
-          code: ErrorStatusCodes.InvalidAmount,
-          message: {
-            uz: 'Noto`g`ri summa',
-            en: 'Invalid amount',
-            ru: 'Недопустимая сумма',
-          },
-          data: null,
-        },
+        error: PaymeError.InvalidAmount,
       };
     }
+
     return {
       result: {
         allow: true,
@@ -309,13 +325,29 @@ export class PaymeService {
       },
     });
 
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId: transaction.userId,
+        planId: plan.id,
+      },
+    });
+
+    if (myCourse) {
+      return {
+        error: PaymeError.CantDoOperation,
+        id: performTransactionDto.params.id,
+      };
+    }
+
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
+    // create my course
     await this.prismaService.myCourses.create({
       data: {
         userId: transaction.userId,
         courseId: plan.courseId,
-        planId: transaction.planId,
+        planId: plan.id,
         expirationDate,
       },
     });
@@ -395,11 +427,13 @@ export class PaymeService {
       };
     }
 
+    const deleteUniqueInputs = {
+      userId: transaction.userId,
+      planId: transaction.planId,
+    } as Prisma.MyCoursesWhereUniqueInput;
+
     await this.prismaService.myCourses.delete({
-      where: {
-        userId: transaction.userId,
-        planId: transaction.planId,
-      },
+      where: deleteUniqueInputs,
     });
 
     const updatedTransaction = await this.prismaService.transactions.update({

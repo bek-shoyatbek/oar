@@ -43,7 +43,7 @@ export class ClickService {
 
     const planId = clickReqBody.merchant_trans_id;
     const userId = clickReqBody.param2;
-    const amount = clickReqBody.amount;
+    const amount = parseInt(`${clickReqBody.amount}`);
     const transId = clickReqBody.click_trans_id + ''; // ! in db transId is string
 
     const md5Hash = this.hashingService.md5(
@@ -128,7 +128,25 @@ export class ClickService {
       };
     }
 
-    if (parseInt(`${amount}`) !== plan.price) {
+    const discount = plan?.discount || 0;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+
+    let expectedAmount: number;
+    console.log('isDiscountValid', isDiscountValid);
+
+    if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
+      expectedAmount = discount;
+    } else {
+      console.log('amount', amount);
+      expectedAmount = amount;
+    }
+
+    console.log('expectedAmount', expectedAmount);
+
+    if (amount !== expectedAmount) {
       console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
@@ -187,7 +205,7 @@ export class ClickService {
     const prepareId = clickReqBody.merchant_prepare_id;
     const transId = clickReqBody.click_trans_id;
     const serviceId = clickReqBody.service_id;
-    const amount = clickReqBody.amount;
+    const amount = parseInt(`${clickReqBody.amount}`);
     const signTime = clickReqBody.sign_time;
     const error = clickReqBody.error;
 
@@ -274,7 +292,26 @@ export class ClickService {
       };
     }
 
-    if (parseInt(`${amount}`) !== plan.price) {
+    const discount = plan?.discount || 0;
+    const discountExpiredAt = new Date(plan?.discountExpiredAt);
+    const isDiscountValid =
+      discountExpiredAt && new Date() <= discountExpiredAt;
+
+    let expectedAmount: number;
+    console.log('isDiscountValid', isDiscountValid);
+
+    if (isDiscountValid && discount > 0) {
+      console.log('discount', discount);
+      expectedAmount = discount;
+    } else {
+      console.log('amount', amount);
+      expectedAmount = amount;
+    }
+
+    console.log('expectedAmount', expectedAmount);
+
+    if (amount !== expectedAmount) {
+      console.error('Invalid amount');
       return {
         error: ClickError.InvalidAmount,
         error_note: 'Invalid amount',
@@ -319,13 +356,29 @@ export class ClickService {
       },
     });
 
+    // if user already bought this course
+    const myCourse = await this.prismaService.myCourses.findFirst({
+      where: {
+        userId,
+        planId,
+      },
+    });
+
+    if (myCourse) {
+      return {
+        error: ClickError.AlreadyPaid,
+        error_note: 'Already bought',
+      };
+    }
+
     const expirationDate = this.calculateExpirationDate(plan.availablePeriod);
 
+    // create my course
     await this.prismaService.myCourses.create({
       data: {
-        userId,
+        userId: user.id,
         courseId: plan.courseId,
-        planId,
+        planId: plan.id,
         expirationDate,
       },
     });

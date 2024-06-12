@@ -34,7 +34,8 @@ export class LessonsController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'video', maxCount: 1 },
+        { name: 'videoUz', maxCount: 1 },
+        { name: 'videoRu', maxCount: 1 },
         {
           name: 'attachedFiles',
           maxCount: 5,
@@ -49,15 +50,17 @@ export class LessonsController {
     @Body() createLessonDto: Prisma.LessonsCreateInput,
     @UploadedFiles()
     files: {
-      video: Express.Multer.File[];
+      videoUz: Express.Multer.File[];
+      videoRu: Express.Multer.File[];
       attachedFiles?: Express.Multer.File[];
     },
   ) {
-    const video = files.video[0];
+    const videoUz = files.videoUz[0];
+    const videoRu = files.videoRu[0];
     const attachedFiles = files?.attachedFiles;
 
-    if (!video) {
-      throw new BadRequestException('video is required');
+    if (!videoUz || !videoRu) {
+      throw new BadRequestException('video in uz and ru are required');
     }
 
     if (attachedFiles) {
@@ -66,7 +69,9 @@ export class LessonsController {
       ]);
     }
 
-    createLessonDto.video = await this.s3Service.upload(video);
+    createLessonDto.videoUz = await this.s3Service.upload(videoUz);
+
+    createLessonDto.videoRu = await this.s3Service.upload(videoRu);
 
     return await this.lessonsService.create(moduleId, createLessonDto);
   }
@@ -84,7 +89,8 @@ export class LessonsController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'video', maxCount: 1 },
+        { name: 'videoUz', maxCount: 1 },
+        { name: 'videoRu', maxCount: 1 },
         {
           name: 'attachedFiles',
           maxCount: 5,
@@ -99,12 +105,17 @@ export class LessonsController {
     @Param('id') id: string,
     @UploadedFiles()
     files: {
-      video?: Express.Multer.File[];
+      videoUz?: Express.Multer.File[];
+      videoRu?: Express.Multer.File[];
       attachedFiles?: Express.Multer.File[];
     },
   ) {
-    if (files?.video) {
-      updateLessonDto.video = await this.s3Service.upload(files.video[0]);
+    if (files?.videoUz) {
+      updateLessonDto.videoUz = await this.s3Service.upload(files.videoUz[0]);
+    }
+
+    if (files?.videoRu) {
+      updateLessonDto.videoRu = await this.s3Service.upload(files.videoRu[0]);
     }
 
     if (files?.attachedFiles) {

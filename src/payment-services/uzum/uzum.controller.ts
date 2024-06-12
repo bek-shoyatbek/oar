@@ -24,7 +24,11 @@ export class UzumController {
   @UseGuards(UzumBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async check(@Body() checkTransactionDto: CheckTransactionDto) {
-    return await this.uzumService.check(checkTransactionDto);
+    console.log('uzumReqBody:', checkTransactionDto);
+    const response = await this.uzumService.check(checkTransactionDto);
+    console.log('response', response);
+
+    return response;
   }
 
   @Post('create')
@@ -32,7 +36,11 @@ export class UzumController {
   @UseGuards(UzumBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async create(@Body() createTransactionDto: CreateTransactionDto) {
-    return await this.uzumService.create(createTransactionDto);
+    console.log('uzumReqBody:', createTransactionDto);
+    const response = await this.uzumService.create(createTransactionDto);
+    console.log('response', response);
+
+    return response;
   }
 
   @Post('confirm')
@@ -40,7 +48,11 @@ export class UzumController {
   @UseGuards(UzumBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async confirm(@Body() confirmTransactionDto: ConfirmTransactionDto) {
-    return await this.uzumService.confirm(confirmTransactionDto);
+    console.log('uzumReqBody:', confirmTransactionDto);
+    const response = await this.uzumService.confirm(confirmTransactionDto);
+    console.log('response', response);
+
+    return response;
   }
 
   @Post('reverse')
@@ -48,7 +60,11 @@ export class UzumController {
   @UseGuards(UzumBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async reverse(@Body() reverseTransactionDto: ReverseTransactionDto) {
-    return await this.uzumService.reverse(reverseTransactionDto);
+    console.log('uzumReqBody:', reverseTransactionDto);
+    const response = await this.uzumService.reverse(reverseTransactionDto);
+    console.log('response', response);
+
+    return response;
   }
 
   @Post('status')
@@ -56,6 +72,9 @@ export class UzumController {
   @UseGuards(UzumBasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   async status(@Body() checkTransactionStatusDto: CheckTransactionStatusDto) {
-    return await this.uzumService.status(checkTransactionStatusDto);
+    console.log('uzumReqBody:', checkTransactionStatusDto);
+    const response = await this.uzumService.status(checkTransactionStatusDto);
+    console.log('response', response);
+    return response;
   }
 }

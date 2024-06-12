@@ -9,6 +9,8 @@ import {
   UseInterceptors,
   UploadedFile,
   UseFilters,
+  UseGuards,
+  Param,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Prisma } from '@prisma/client';
@@ -17,6 +19,8 @@ import { STORAGE } from '../constants/storage';
 import { getImageValidator } from 'src/utils/custom-validators/image-validator/image-validator';
 import { S3Service } from 'src/aws/s3/s3.service';
 import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.filter';
+import { Roles } from 'src/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
@@ -54,6 +58,22 @@ export class UsersController {
     }
 
     return await this.usersService.update(userId, updateUserDto);
+  }
+
+  @Get('all')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @UseFilters(PrismaClientExceptionFilter)
+  async findAll() {
+    return await this.usersService.findAll();
+  }
+
+  @Get(':id')
+  @Roles('admin')
+  @UseGuards(RolesGuard)
+  @UseFilters(PrismaClientExceptionFilter)
+  async findOne(@Param('id') id: string) {
+    return await this.usersService.findOne(id);
   }
 
   @Delete()

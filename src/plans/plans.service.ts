@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
@@ -20,9 +20,18 @@ export class PlansService {
 
   async update(id: string, updatePlanDto: Prisma.PlansUpdateInput) {
     updatePlanDto = this.transformData(updatePlanDto);
+
+    const plan = await this.prismaService.plans.findUnique({
+      where: { id },
+    });
+
+    if (!plan) {
+      throw new BadRequestException('Plan not found');
+    }
+
     return await this.prismaService.plans.update({
       where: { id },
-      data: updatePlanDto,
+      data: { ...updatePlanDto },
     });
   }
 
@@ -31,9 +40,21 @@ export class PlansService {
   }
 
   async findAll(courseId: string) {
-    return await this.prismaService.plans.findMany({
+    const plans = await this.prismaService.plans.findMany({
       where: { courseId: { equals: courseId } },
     });
+
+    plans?.map((plan) => {
+      const expiredDate = new Date(plan?.discountExpiredAt);
+      if (!plan?.discount || expiredDate < new Date()) {
+        delete plan.discount;
+        delete plan.discountExpiredAt;
+      }
+
+      return plan;
+    });
+
+    return plans;
   }
 
   transformData(data: any) {
