@@ -53,11 +53,6 @@ export class UsersService {
       throw new BadRequestException('Invalid user id');
     }
 
-    if (updateUserDto.password) {
-      updateUserDto.password = await this.hashingService.hashPassword(
-        updateUserDto.password as string,
-      );
-    }
 
     if (updateUserDto.role) {
       throw new BadRequestException('You can not change user role');
