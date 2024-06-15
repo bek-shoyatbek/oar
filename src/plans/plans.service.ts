@@ -22,7 +22,7 @@ export class PlansService {
     updatePlanDto = this.transformData(updatePlanDto);
 
     const plan = await this.prismaService.plans.findUnique({
-      where: { id, isDeleted: false },
+      where: { id, isDeleted: { not: true } },
     });
 
     if (!plan) {
@@ -44,7 +44,7 @@ export class PlansService {
 
   async findAll(courseId: string) {
     const plans = await this.prismaService.plans.findMany({
-      where: { courseId: { equals: courseId }, isDeleted: false },
+      where: { courseId: { equals: courseId }, isDeleted: { not: true } },
     });
 
     plans?.map((plan) => {
