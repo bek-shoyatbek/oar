@@ -22,7 +22,7 @@ export class PlansService {
     updatePlanDto = this.transformData(updatePlanDto);
 
     const plan = await this.prismaService.plans.findUnique({
-      where: { id },
+      where: { id, isDeleted: false },
     });
 
     if (!plan) {
@@ -36,12 +36,15 @@ export class PlansService {
   }
 
   async delete(id: string) {
-    return await this.prismaService.plans.delete({ where: { id } });
+    return await this.prismaService.plans.update({
+      where: { id },
+      data: { isDeleted: true, deletedDate: new Date() },
+    });
   }
 
   async findAll(courseId: string) {
     const plans = await this.prismaService.plans.findMany({
-      where: { courseId: { equals: courseId } },
+      where: { courseId: { equals: courseId }, isDeleted: false },
     });
 
     plans?.map((plan) => {
