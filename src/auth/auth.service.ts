@@ -104,6 +104,12 @@ export class AuthService {
   }
 
   async registerWithPhone(registerWithPhoneDto: RegisterWithPhoneDto) {
+    const startsWithPlus = registerWithPhoneDto.phone.startsWith('+');
+
+    if (startsWithPlus) {
+      registerWithPhoneDto.phone = registerWithPhoneDto.phone.slice(1);
+    }
+
     const isValidPhone = await this.userService.findOneByPhone(
       registerWithPhoneDto.phone,
     );
@@ -140,6 +146,12 @@ export class AuthService {
   }
 
   async loginWithPhone(loginWithPhoneDto: LoginWithPhoneDto) {
+    const startsWithPlus = loginWithPhoneDto.phone.startsWith('+');
+
+    if (startsWithPlus) {
+      loginWithPhoneDto.phone = loginWithPhoneDto.phone.slice(1);
+    }
+
     const user = await this.userService.findOneByPhone(loginWithPhoneDto.phone);
 
     if (!user) {
@@ -244,6 +256,11 @@ export class AuthService {
   }
 
   async sendResetCodeByPhone(phone: string) {
+    const startsWithPlus = phone.startsWith('+');
+    if (startsWithPlus) {
+      phone = phone.slice(1);
+    }
+
     const user = await this.userService.findOneByPhone(phone);
 
     if (!user) {
@@ -287,7 +304,21 @@ export class AuthService {
       throw new BadRequestException('Invalid code');
     }
 
-    const user = await this.userService.findOneByEmail(credentials.email);
+    let user;
+
+    if (credentials?.email) {
+      user = await this.userService.findOneByEmail(credentials.email);
+    }
+
+    if (credentials?.phone) {
+      const startsWithPlus = credentials.phone.startsWith('+');
+
+      if (startsWithPlus) {
+        credentials.phone = credentials.phone.slice(1);
+      }
+      user = await this.userService.findOneByPhone(credentials.phone);
+    }
+
     if (!user) {
       throw new BadRequestException('User not found');
     }
