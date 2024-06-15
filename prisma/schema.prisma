@@ -108,6 +108,8 @@ model Plans {
   includeSupport            Boolean        @default(false)
   price                     Float
   courseId                  String         @db.ObjectId
+  isDeleted                 Boolean?        @default(false)
+  deletedDate               DateTime?
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
   Transactions              Transactions[]
