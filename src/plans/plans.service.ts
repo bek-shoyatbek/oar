@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { all } from 'axios';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -22,7 +23,7 @@ export class PlansService {
     updatePlanDto = this.transformData(updatePlanDto);
 
     const plan = await this.prismaService.plans.findUnique({
-      where: { id, isDeleted: { not: true } },
+      where: { id },
     });
 
     if (!plan) {
@@ -43,8 +44,17 @@ export class PlansService {
   }
 
   async findAll(courseId: string) {
-    const plans = await this.prismaService.plans.findMany({
-      where: { courseId: { equals: courseId }, isDeleted: { not: true } },
+    let plans = [];
+    const allPlans = await this.prismaService.plans.findMany({
+      where: {
+        courseId: { equals: courseId },
+      },
+    });
+
+    allPlans?.forEach((plan) => {
+      if (!plan?.isDeleted || !plan?.isDeleted) {
+        plans.push(plan);
+      }
     });
 
     plans?.map((plan) => {
