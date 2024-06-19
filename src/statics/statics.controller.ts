@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -29,7 +28,7 @@ export class StaticsController {
     private readonly s3Service: S3Service,
   ) {}
 
-  @Post('upload')
+  @Post('create')
   @Roles('admin')
   @UseGuards(RolesGuard)
   @UseInterceptors(FileInterceptor('file', { storage: STORAGE }))
@@ -38,11 +37,9 @@ export class StaticsController {
     @Body() uploadFileDto: Prisma.StaticsCreateInput,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!file) {
-      throw new BadRequestException('File is required');
+    if (file) {
+      uploadFileDto.file = await this.s3Service.upload(file);
     }
-
-    uploadFileDto.file = await this.s3Service.upload(file);
 
     return await this.staticsService.uploadFile(uploadFileDto);
   }

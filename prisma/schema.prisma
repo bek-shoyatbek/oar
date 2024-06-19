@@ -170,11 +170,17 @@ model Comments {
 }
 
 model Statics {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  idx       String
-  file      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  idx        String   @default("static")
+  titleUz    String?
+  titleRu    String?
+  subTitleUz String?
+  subTitleRu String?
+  textUz     String?
+  textRu     String?
+  file       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 enum UserRole {
