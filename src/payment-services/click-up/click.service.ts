@@ -6,6 +6,8 @@ import { PrismaService } from 'src/prisma.service';
 import { HashingService } from 'src/utils/hashing/hashing.service';
 import { ConfigService } from '@nestjs/config';
 import { ClickError } from 'src/enums/Payment.enum';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationDto } from 'src/notifications/dto/notification.dto';
 
 @Injectable()
 export class ClickService {
@@ -13,6 +15,7 @@ export class ClickService {
     private readonly prismaService: PrismaService,
     private readonly hashingService: HashingService,
     private readonly configService: ConfigService,
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async handleMerchantTransactions(clickReqBody: ClickRequestDto) {
@@ -382,6 +385,22 @@ export class ClickService {
         expirationDate,
       },
     });
+
+    const sendNotificationParams = {};
+
+    if (user?.email) {
+      sendNotificationParams['provider'] = 'mail';
+      sendNotificationParams['contact'] = user.email;
+      sendNotificationParams['package'] = plan?.package;
+    } else {
+      sendNotificationParams['provider'] = 'sms';
+      sendNotificationParams['contact'] = user?.phone;
+      sendNotificationParams['package'] = plan?.package;
+    }
+
+    await this.notificationService.sendNotification(
+      sendNotificationParams as NotificationDto,
+    );
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,
