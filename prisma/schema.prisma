@@ -132,21 +132,21 @@ model MyCourses {
 }
 
 model Articles {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  titleUz      String
-  titleRu      String
-  headlineUz   String
-  headlineRu   String
-  textUz       String
-  textRu       String
-  articleImageWeb String
-  articleImageMobile String
-  imageWeb     String
-  imageMobile  String
-  link         String
-  isPublished  Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  titleUz            String
+  titleRu            String
+  headlineUz         String
+  headlineRu         String
+  textUz             String
+  textRu             String
+  articleImageWeb    String?
+  articleImageMobile String?
+  imageWeb           String
+  imageMobile        String
+  link               String
+  isPublished        Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 model Banners {
