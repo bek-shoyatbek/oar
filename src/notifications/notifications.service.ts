@@ -24,7 +24,8 @@ export class NotificationsService {
       case 'mail':
         const sendMailParams = {
           to: notificationDto.contact,
-          subject: MESSAGES.mail[notificationDto.package],
+          subject:
+            'Приветственное письмо участникам курса «Прикорм без проблем» --- Поздравляем! Оплата за курс «Прикорм без проблем» прошла успешно! ',
           text: MESSAGES.mail[notificationDto.package],
         };
         await this.mailService.sendMail(sendMailParams);
