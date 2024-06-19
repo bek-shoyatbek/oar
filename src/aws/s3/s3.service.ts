@@ -20,6 +20,8 @@ export class S3Service {
   async upload(file: Express.Multer.File) {
     const fileName = this.getUniqueFilename(file.originalname);
 
+    console.log('fileName', fileName);
+
     const domainName = this.configService.get<string>('AWS_CF_DOMAIN');
     const bucketName = this.configService.get<string>('AWS_BUCKET_NAME');
     const params = {

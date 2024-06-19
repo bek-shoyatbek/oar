@@ -25,6 +25,7 @@ import { CommentsModule } from './comments/comments.module';
 import { PlansModule } from './plans/plans.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { StaticsModule } from './statics/statics.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { AuthGuard } from './auth/guards/auth.guard';
     BannersModule,
     CommentsModule,
     PlansModule,
+    StaticsModule,
   ],
   controllers: [AppController],
   providers: [
