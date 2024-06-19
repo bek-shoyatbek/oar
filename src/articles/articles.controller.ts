@@ -37,7 +37,8 @@ export class ArticlesController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'articleImage', maxCount: 1 },
+        { name: 'articleImageWeb', maxCount: 1 },
+	{ name: 'articleImageMobile', maxCount: 1 },
         {
           name: 'bannerImageWeb',
           maxCount: 1,
@@ -54,32 +55,37 @@ export class ArticlesController {
   async create(
     @UploadedFiles()
     files: {
-      articleImage: Express.Multer.File[];
+      articleImageWeb: Express.Multer.File[];
+      articleImageMobile: Express.Multer.File[];
       bannerImageWeb: Express.Multer.File[];
       bannerImageMobile: Express.Multer.File[];
     },
     @Body() createArticleDto: Prisma.ArticlesCreateInput,
   ) {
-    const articleImage = files.articleImage[0];
-    const bannerImageWeb = files.bannerImageWeb[0];
-    const bannerImageMobile = files.bannerImageMobile[0];
+    const articleImageWeb = files?.articleImageWeb[0];
+    const articleImageMobile = files?.articleImageMobile[0];
+    const bannerImageWeb = files?.bannerImageWeb[0];
+    const bannerImageMobile = files?.bannerImageMobile[0];
 
-    if (!articleImage || !bannerImageMobile || !bannerImageWeb) {
+    if (!articleImageWeb || !articleImageMobile || !bannerImageMobile || !bannerImageWeb) {
       throw new BadRequestException(
         'articleImage,bannerImageWeb and mobile are required',
       );
     }
 
     const filesToUpload = [
-      this.s3Service.upload(articleImage),
+      this.s3Service.upload(articleImageWeb),
+      this.s3Service.upload(articleImageMobile),
       this.s3Service.upload(bannerImageWeb),
       this.s3Service.upload(bannerImageMobile),
     ];
 
-    const [articleImageURL, bannerImageWebURL, bannerImageMobileURL] =
+    const [articleImageWebURL,articleImageMobileURL, bannerImageWebURL, bannerImageMobileURL] =
       await Promise.all(filesToUpload);
 
-    createArticleDto.articleImage = articleImageURL;
+    createArticleDto.articleImageWeb = articleImageWebURL;
+
+    createArticleDto.articleImageMobile = articleImageMobileURL;
 
     createArticleDto.imageWeb = bannerImageWebURL;
 
@@ -95,7 +101,8 @@ export class ArticlesController {
   @UseInterceptors(
     FileFieldsInterceptor(
       [
-        { name: 'articleImage', maxCount: 1 },
+        { name: 'articleImageWeb', maxCount: 1 },
+        { name: 'articleImageMobile', maxCount: 1 },
         {
           name: 'bannerImageWeb',
           maxCount: 1,
@@ -112,21 +119,25 @@ export class ArticlesController {
     @Body() updateArticleDto: Prisma.ArticlesUpdateInput,
     @UploadedFiles()
     files: {
-      articleImage?: Express.Multer.File[];
+      articleImageWeb?: Express.Multer.File[];
+      articleImageMobile?: Express.Multer.File[];
       bannerImageWeb?: Express.Multer.File[];
       bannerImageMobile?: Express.Multer.File[];
     },
     @Param('id') id: string,
   ) {
-    const articleImage = files?.articleImage && files?.articleImage[0];
+    const articleImageWeb = files?.articleImageWeb && files?.articleImageWeb[0];
+    const articleImageMobile = files?.articleImageMobile && files?.articleImageMobile[0];
     const bannerImageWeb = files.bannerImageWeb && files.bannerImageWeb[0];
     const bannerImageMobile =
       files.bannerImageMobile && files.bannerImageMobile[0];
 
-    if (articleImage) {
-      updateArticleDto.articleImage = await this.s3Service.upload(articleImage);
+    if (articleImageWeb) {
+      updateArticleDto.articleImageWeb = await this.s3Service.upload(articleImageWeb);
     }
-
+    if (articleImageMobile) {
+      updateArticleDto.articleImageMobile = await this.s3Service.upload(articleImageMobile);
+    }
     if (bannerImageWeb) {
       updateArticleDto.imageWeb = await this.s3Service.upload(bannerImageWeb);
     }

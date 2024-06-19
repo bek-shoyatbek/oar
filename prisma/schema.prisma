@@ -139,7 +139,8 @@ model Articles {
   headlineRu   String
   textUz       String
   textRu       String
-  articleImage String
+  articleImageWeb String
+  articleImageMobile String
   imageWeb     String
   imageMobile  String
   link         String
