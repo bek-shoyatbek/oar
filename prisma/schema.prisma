@@ -110,6 +110,7 @@ model Plans {
   courseId                  String         @db.ObjectId
   isDeleted                 Boolean?       @default(false)
   deletedDate               DateTime?
+  package                   PlanPackage?
   createdAt                 DateTime       @default(now())
   updatedAt                 DateTime       @updatedAt
   Transactions              Transactions[]
@@ -206,4 +207,10 @@ enum CourseStatus {
   inProgress
   archived
   reversed
+}
+
+enum PlanPackage {
+  basic
+  standard
+  premium
 }

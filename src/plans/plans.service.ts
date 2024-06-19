@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { all } from 'axios';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -32,7 +31,7 @@ export class PlansService {
 
     return await this.prismaService.plans.update({
       where: { id },
-      data: { ...updatePlanDto },
+      data: updatePlanDto,
     });
   }
 
