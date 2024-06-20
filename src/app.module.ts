@@ -39,15 +39,16 @@ import { NotificationsModule } from './notifications/notifications.module';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     MailerModule.forRoot({
       transport: {
-        service: 'gmail',
+        host: process.env.MAIL_SERVER,
+        port: Number(process.env.MAIL_PORT),
         secure: false,
         auth: {
-          user: process.env.MAILER_USER,
-          pass: process.env.MAILER_PASSWORD,
+          user: process.env.MAIL_LOGIN,
+          pass: process.env.MAIL_PWD,
         },
       },
       defaults: {
-        from: process.env.MAILER_FROM,
+        from: process.env.MAIL_FROM,
       },
     }),
     CoursesModule,
