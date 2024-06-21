@@ -1,14 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { SendMailDto } from './dto/send-mail.dto';
 
 @Injectable()
 export class MailService {
-  constructor(private readonly mailerService: MailerService) {
-  }
+  private readonly logger = new Logger(MailService.name);
+  constructor(private readonly mailerService: MailerService) {}
 
   async sendMail(sendMailDto: SendMailDto) {
-    await this.mailerService.sendMail(sendMailDto);
+    const mailStatus = await this.mailerService.sendMail(sendMailDto);
+    this.logger.log(sendMailDto, 'mail');
+    this.logger.log(mailStatus, 'mail');
     return 'Mail sent successfully';
   }
 }

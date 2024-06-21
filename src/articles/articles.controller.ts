@@ -38,7 +38,7 @@ export class ArticlesController {
     FileFieldsInterceptor(
       [
         { name: 'articleImageWeb', maxCount: 1 },
-	{ name: 'articleImageMobile', maxCount: 1 },
+        { name: 'articleImageMobile', maxCount: 1 },
         {
           name: 'bannerImageWeb',
           maxCount: 1,
@@ -67,7 +67,12 @@ export class ArticlesController {
     const bannerImageWeb = files?.bannerImageWeb[0];
     const bannerImageMobile = files?.bannerImageMobile[0];
 
-    if (!articleImageWeb || !articleImageMobile || !bannerImageMobile || !bannerImageWeb) {
+    if (
+      !articleImageWeb ||
+      !articleImageMobile ||
+      !bannerImageMobile ||
+      !bannerImageWeb
+    ) {
       throw new BadRequestException(
         'articleImage,bannerImageWeb and mobile are required',
       );
@@ -80,8 +85,12 @@ export class ArticlesController {
       this.s3Service.upload(bannerImageMobile),
     ];
 
-    const [articleImageWebURL,articleImageMobileURL, bannerImageWebURL, bannerImageMobileURL] =
-      await Promise.all(filesToUpload);
+    const [
+      articleImageWebURL,
+      articleImageMobileURL,
+      bannerImageWebURL,
+      bannerImageMobileURL,
+    ] = await Promise.all(filesToUpload);
 
     createArticleDto.articleImageWeb = articleImageWebURL;
 
@@ -127,16 +136,19 @@ export class ArticlesController {
     @Param('id') id: string,
   ) {
     const articleImageWeb = files?.articleImageWeb && files?.articleImageWeb[0];
-    const articleImageMobile = files?.articleImageMobile && files?.articleImageMobile[0];
+    const articleImageMobile =
+      files?.articleImageMobile && files?.articleImageMobile[0];
     const bannerImageWeb = files.bannerImageWeb && files.bannerImageWeb[0];
     const bannerImageMobile =
       files.bannerImageMobile && files.bannerImageMobile[0];
 
     if (articleImageWeb) {
-      updateArticleDto.articleImageWeb = await this.s3Service.upload(articleImageWeb);
+      updateArticleDto.articleImageWeb =
+        await this.s3Service.upload(articleImageWeb);
     }
     if (articleImageMobile) {
-      updateArticleDto.articleImageMobile = await this.s3Service.upload(articleImageMobile);
+      updateArticleDto.articleImageMobile =
+        await this.s3Service.upload(articleImageMobile);
     }
     if (bannerImageWeb) {
       updateArticleDto.imageWeb = await this.s3Service.upload(bannerImageWeb);

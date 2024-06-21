@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Sms } from './interfaces/sms.interface';
 import { createHash } from 'node:crypto';
 import {
@@ -11,10 +11,10 @@ import { ConfigService } from '@nestjs/config';
 import { GeneratorService } from 'src/utils/generator/generator.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { debug, info } from 'node:console';
 
 @Injectable()
 export class SmsService implements Sms {
+  private readonly logger = new Logger(SmsService.name);
   private username: string;
   private smsURL: string;
   private smsSecret: string;
@@ -33,6 +33,17 @@ export class SmsService implements Sms {
     sendSmsParams: SendSmsParams,
   ): Promise<SendSmsResponse | SendSmsErrorResponse> {
     try {
+      if (!sendSmsParams.phone) {
+        this.logger.error('Phone is required', 'sms');
+        throw new Error();
+      }
+      if (!sendSmsParams.text) {
+        this.logger.error("Text can't be empty", 'sms');
+        throw new Error();
+      }
+
+      this.logger.log(sendSmsParams, 'sms');
+
       let uTime = new Date().valueOf() / 1000;
       const smsId = this.generatorService.generateConfirmationCode();
       const message = {
@@ -64,6 +75,13 @@ export class SmsService implements Sms {
       );
 
       const res = await firstValueFrom(request);
+
+      if (res.data.error) {
+        this.logger.error(res.data.error, 'sms');
+        throw new Error(res.data.error);
+      }
+
+      this.logger.log(res.data, 'sms');
 
       return res.data;
     } catch (err) {
