@@ -74,6 +74,9 @@ export class CoursesService {
     if (!course) {
       throw new BadRequestException('Course not found');
     }
-    return await this.prismaService.courses.delete({ where: { id } });
+    await this.prismaService.courses.delete({ where: { id } });
+
+    await this.prismaService.myCourses.deleteMany({ where: { courseId: id } });
+    return 'Course deleted successfully';
   }
 }
