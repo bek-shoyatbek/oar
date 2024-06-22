@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TransactionMethods } from './constants/transaction-methods';
 import { CheckPerformTransactionDto } from './dto/check-perform-transaction.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -14,10 +14,16 @@ import { PaymeError } from './constants/payme-error';
 import { DateTime } from 'luxon';
 import { CancelingReasons } from './constants/canceling-reasons';
 import { Prisma } from '@prisma/client';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationDto } from 'src/notifications/dto/notification.dto';
 
 @Injectable()
 export class PaymeService {
-  constructor(private readonly prismaService: PrismaService) {}
+  private readonly logger = new Logger(PaymeService.name);
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly notificationService: NotificationsService,
+  ) {}
 
   async handleTransactionMethods(reqBody: RequestBody) {
     const method = reqBody.method;
@@ -351,6 +357,32 @@ export class PaymeService {
         expirationDate,
       },
     });
+
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: transaction.userId,
+      },
+    });
+
+    const sendNotificationParams = {};
+
+    if (user?.email) {
+      sendNotificationParams['provider'] = 'mail';
+      sendNotificationParams['contact'] = user.email;
+      sendNotificationParams['package'] = plan?.package;
+    } else {
+      sendNotificationParams['provider'] = 'sms';
+      sendNotificationParams['contact'] = user?.phone;
+      sendNotificationParams['package'] = plan?.package;
+    }
+
+    this.logger.log('sendNotificationParams', sendNotificationParams);
+
+    const sendNotification = await this.notificationService.sendNotification(
+      sendNotificationParams as NotificationDto,
+    );
+
+    this.logger.log('sendNotification', sendNotification);
 
     const performTime = new Date();
 

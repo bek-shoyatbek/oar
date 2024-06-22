@@ -399,13 +399,13 @@ export class ClickService {
       sendNotificationParams['package'] = plan?.package;
     }
 
-    console.log('sendNotificationParams', sendNotificationParams);
+    this.logger.log('sendNotificationParams', sendNotificationParams);
 
     const sendNotification = await this.notificationService.sendNotification(
       sendNotificationParams as NotificationDto,
     );
 
-    console.log('sendNotification', sendNotification);
+    this.logger.log('sendNotification', sendNotification);
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,

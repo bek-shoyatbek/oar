@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CheckTransactionDto } from './dto/check-transaction.dto';
 import { PrismaService } from 'src/prisma.service';
 import { ErrorStatusCode } from './constants/error-status-codes';
@@ -11,12 +11,16 @@ import { CheckTransactionStatusDto } from './dto/check-status.dto';
 import { ObjectId } from 'mongodb';
 import { error } from 'console';
 import { Prisma } from '@prisma/client';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { NotificationDto } from 'src/notifications/dto/notification.dto';
 
 @Injectable()
 export class UzumService {
+  private readonly logger = new Logger(UzumService.name);
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly notificationService: NotificationsService,
   ) {}
   async check(checkTransactionDto: CheckTransactionDto) {
     const isValidServiceId = this.checkServiceId(checkTransactionDto.serviceId);
@@ -302,6 +306,32 @@ export class UzumService {
         expirationDate,
       },
     });
+
+    const user = await this.prismaService.users.findUnique({
+      where: {
+        id: transaction.userId,
+      },
+    });
+
+    const sendNotificationParams = {};
+
+    if (user?.email) {
+      sendNotificationParams['provider'] = 'mail';
+      sendNotificationParams['contact'] = user.email;
+      sendNotificationParams['package'] = plan?.package;
+    } else {
+      sendNotificationParams['provider'] = 'sms';
+      sendNotificationParams['contact'] = user?.phone;
+      sendNotificationParams['package'] = plan?.package;
+    }
+
+    this.logger.log('sendNotificationParams', sendNotificationParams);
+
+    const sendNotification = await this.notificationService.sendNotification(
+      sendNotificationParams as NotificationDto,
+    );
+
+    this.logger.log('sendNotification', sendNotification);
 
     await this.prismaService.transactions.update({
       where: {
