@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ClickRequestDto } from './dto/click-request.dto';
 import { TransactionActions } from './constants/transaction-actions';
 import { ObjectId } from 'mongodb';
@@ -11,6 +11,7 @@ import { NotificationDto } from 'src/notifications/dto/notification.dto';
 
 @Injectable()
 export class ClickService {
+  private readonly logger = new Logger(ClickService.name);
   constructor(
     private readonly prismaService: PrismaService,
     private readonly hashingService: HashingService,
@@ -398,9 +399,13 @@ export class ClickService {
       sendNotificationParams['package'] = plan?.package;
     }
 
-    await this.notificationService.sendNotification(
+    console.log('sendNotificationParams', sendNotificationParams);
+
+    const sendNotification = await this.notificationService.sendNotification(
       sendNotificationParams as NotificationDto,
     );
+
+    console.log('sendNotification', sendNotification);
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,

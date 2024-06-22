@@ -20,7 +20,7 @@ export class NotificationsService {
           text: MESSAGES.sms[notificationDto.package],
         };
         await this.smsService.sendSms(sendSMSParams);
-        break;
+        return 'sms sent';
       case 'mail':
         const sendMailParams = {
           to: notificationDto.contact,
@@ -29,7 +29,7 @@ export class NotificationsService {
           text: MESSAGES.mail[notificationDto.package],
         };
         await this.mailService.sendMail(sendMailParams);
-        break;
+        return 'mail sent';
       default:
         throw new Error('Unknown notification type');
     }
