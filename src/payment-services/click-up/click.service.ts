@@ -393,19 +393,19 @@ export class ClickService {
       sendNotificationParams['provider'] = 'mail';
       sendNotificationParams['contact'] = user.email;
       sendNotificationParams['package'] = plan?.package;
+      this.logger.log(sendNotificationParams, 'sendNotificationParams');
+      await this.notificationService.sendNotification(
+        sendNotificationParams as NotificationDto,
+      );
     } else {
       sendNotificationParams['provider'] = 'sms';
       sendNotificationParams['contact'] = user?.phone;
       sendNotificationParams['package'] = plan?.package;
+      this.logger.log(sendNotificationParams, 'sendNotificationParams');
+      await this.notificationService.sendNotification(
+        sendNotificationParams as NotificationDto,
+      );
     }
-
-    this.logger.log(sendNotificationParams, 'sendNotificationParams');
-
-    const sendNotification = await this.notificationService.sendNotification(
-      sendNotificationParams as NotificationDto,
-    );
-
-    this.logger.log('sendNotification', sendNotification);
 
     return {
       click_trans_id: +clickReqBody.click_trans_id,

@@ -319,19 +319,21 @@ export class UzumService {
       sendNotificationParams['provider'] = 'mail';
       sendNotificationParams['contact'] = user.email;
       sendNotificationParams['package'] = plan?.package;
+      this.logger.log(sendNotificationParams, 'sendNotificationParams');
+      await this.notificationService.sendNotification(
+        sendNotificationParams as NotificationDto,
+      );
     } else {
       sendNotificationParams['provider'] = 'sms';
       sendNotificationParams['contact'] = user?.phone;
       sendNotificationParams['package'] = plan?.package;
+      this.logger.log(sendNotificationParams, 'sendNotificationParams');
+      await this.notificationService.sendNotification(
+        sendNotificationParams as NotificationDto,
+      );
     }
 
-    this.logger.log(sendNotificationParams, 'sendNotificationParams');
 
-    const sendNotification = await this.notificationService.sendNotification(
-      sendNotificationParams as NotificationDto,
-    );
-
-    this.logger.log(sendNotification, 'sendNotification');
 
     await this.prismaService.transactions.update({
       where: {
