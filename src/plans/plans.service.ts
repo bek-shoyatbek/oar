@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { ObjectId } from 'mongodb';
 import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
@@ -7,6 +8,7 @@ export class PlansService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createPlanDto: Prisma.PlansCreateInput, courseId: string) {
+    this.checkObjectId(courseId);
     createPlanDto = this.transformData(createPlanDto);
     return await this.prismaService.plans.create({
       data: {
@@ -19,8 +21,9 @@ export class PlansService {
   }
 
   async update(id: string, updatePlanDto: Prisma.PlansUpdateInput) {
-    updatePlanDto = this.transformData(updatePlanDto);
+    this.checkObjectId(id);
 
+    updatePlanDto = this.transformData(updatePlanDto);
     const plan = await this.prismaService.plans.findUnique({
       where: { id },
     });
@@ -36,6 +39,7 @@ export class PlansService {
   }
 
   async delete(id: string) {
+    this.checkObjectId(id);
     return await this.prismaService.plans.update({
       where: { id },
       data: { isDeleted: true, deletedDate: new Date() },
@@ -43,6 +47,7 @@ export class PlansService {
   }
 
   async findAll(courseId: string) {
+    this.checkObjectId(courseId);
     let plans = [];
     const allPlans = await this.prismaService.plans.findMany({
       where: {
@@ -85,5 +90,11 @@ export class PlansService {
     }
 
     return transformedData;
+  }
+
+  private checkObjectId(id: string) {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ObjectId');
+    }
   }
 }
