@@ -127,7 +127,7 @@ export class ClickService {
 
     if (!plan) {
       return {
-        error: ClickError.BadRequest,
+        error: ClickError.UserNotFound,
         error_note: 'Product not found',
       };
     }
@@ -261,7 +261,7 @@ export class ClickService {
 
     if (!plan) {
       return {
-        error: ClickError.BadRequest,
+        error: ClickError.UserNotFound,
         error_note: 'Invalid planId',
       };
     }
