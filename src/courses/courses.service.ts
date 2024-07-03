@@ -52,6 +52,7 @@ export class CoursesService {
   }
 
   async update(id: string, updateCourseDto: Prisma.CoursesUpdateInput) {
+    
     const course = await this.prismaService.courses.findUnique({
       where: { id },
     });

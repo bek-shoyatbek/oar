@@ -25,6 +25,7 @@ import { PrismaClientExceptionFilter } from '../exception-filters/prisma/prisma.
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/decorators/roles.decorator';
 import { Public } from 'src/decorators/public.decorator';
+import { ObjectId } from 'mongodb';
 
 @Controller('courses')
 export class CoursesController {
@@ -64,6 +65,10 @@ export class CoursesController {
       updateCourseDto.image = await this.s3Service.upload(image);
     }
 
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Course id is invalid');
+    }
+
     return await this.coursesService.update(id, updateCourseDto);
   }
 
@@ -86,6 +91,10 @@ export class CoursesController {
   @Public()
   @UseFilters(PrismaClientExceptionFilter)
   async findOne(@Param() params: ValidateObjectIdDto) {
+    if (!ObjectId.isValid(params?.id)) {
+      throw new BadRequestException('Course id is invalid');
+    }
+
     return await this.coursesService.findOne(params.id);
   }
 
@@ -94,6 +103,9 @@ export class CoursesController {
   @UseGuards(RolesGuard)
   @UseFilters(PrismaClientExceptionFilter)
   async delete(@Param('id') id: string) {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Course id is invalid');
+    }
     return await this.coursesService.remove(id);
   }
 }
